@@ -1,0 +1,54 @@
+<?php
+
+use App\Modules\Api\Http\Controllers\Auth\ApiAuthController;
+use App\Modules\Api\Http\Controllers\Auth\ApiTenantRegistrationController;
+use App\Modules\Api\Http\Controllers\Company\ApiCompanyController;
+use App\Modules\Api\Http\Controllers\Plans\ApiPlanController;
+use App\Modules\Api\Http\Controllers\Profile\ApiProfileController;
+use App\Modules\Api\Http\Controllers\Subscription\ApiSubscriptionController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes (Headless Client & Tenant Core Backend)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/ping', function () {
+    return response()->json([
+        'status'  => 'ok',
+        'message' => 'VendorProof Platform API is active and healthy',
+    ]);
+});
+
+Route::prefix('v1')->group(function () {
+    // 1. مسارات الضيوف العامة (صفحة الهبوط والتسعير)
+    Route::get('/plans', [ApiPlanController::class, 'index']);
+
+    // 2. مسارات المصادقة مع حماية التخمين
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::post('/register', [ApiTenantRegistrationController::class, 'register']);
+        Route::post('/login', [ApiAuthController::class, 'login']);
+    });
+
+    // 2. مسارات العميل المحمية بواسطة التوكن الرقمي (Sanctum Token)
+    Route::middleware('auth:sanctum')->group(function () {
+        // فحص الجلسة والاشتراك
+        Route::get('/me', [ApiAuthController::class, 'me']);
+        Route::post('/logout', [ApiAuthController::class, 'logout']);
+
+        // بروفايل المستخدم الشخصي
+        Route::get('/profile', [ApiProfileController::class, 'show']);
+        Route::put('/profile', [ApiProfileController::class, 'update']);
+
+        // بروفايل المنشأة / الشركة
+        Route::get('/company', [ApiCompanyController::class, 'show']);
+        Route::put('/company', [ApiCompanyController::class, 'update']);
+        Route::delete('/company', [ApiCompanyController::class, 'destroy']);
+
+        // إدارة واشتراكات المنشأة
+        Route::get('/subscription', [ApiSubscriptionController::class, 'show']);
+        Route::post('/subscription/upgrade', [ApiSubscriptionController::class, 'upgrade']);
+        Route::post('/subscription/cancel', [ApiSubscriptionController::class, 'cancel']);
+    });
+});

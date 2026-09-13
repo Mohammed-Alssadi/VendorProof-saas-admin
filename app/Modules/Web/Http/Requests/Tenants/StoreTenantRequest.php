@@ -1,0 +1,91 @@
+<?php
+
+namespace App\Modules\Web\Http\Requests\Tenants;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+/**
+ * فحص وتحقق مدخلات تسجيل منشأة جديدة وتعيين مديرها واشتراكها من لوحة الإدارة.
+ */
+class StoreTenantRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            // 1. بيانات المنشأة والسجل التجاري
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/^[a-z0-9-]+$/',
+                'unique:tenants,slug',
+            ],
+            'company_cr' => ['required', 'string', 'max:20', 'unique:tenants,company_cr'],
+            'email' => ['required', 'email', 'max:255', 'unique:tenants,email'],
+            'phone' => ['required', 'string', 'max:20'],
+
+            // 2. بيانات حساب مدير المنشأة الأولي (حساب الدخول)
+            'admin_name' => ['required', 'string', 'max:255'],
+            'admin_email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'admin_password' => ['required', 'string', 'min:8'],
+
+            // 3. باقة الاشتراك ودورة الفوترة
+            'plan_id'       => ['nullable', 'exists:plans,id'],
+            'billing_cycle' => ['nullable', 'in:monthly,yearly'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            // بيانات المنشأة
+            'name.required' => 'يرجى إدخال اسم المنشأة أو الشركة الرسمي.',
+            'name.string' => 'اسم المنشأة يجب أن يكون نصاً صالحاً.',
+            'name.max' => 'اسم المنشأة يجب ألا يتجاوز 255 حرفاً.',
+
+            'slug.required' => 'رابط المنشأة مطلوب.',
+            'slug.string' => 'رابط المنشأة غير صالح.',
+            'slug.max' => 'رابط المنشأة يجب ألا يتجاوز 100 حرف.',
+            'slug.regex' => 'الرابط يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطة (-) فقط (مثال: sahab-tech).',
+            'slug.unique' => 'هذا الرابط مستخدم مسبقاً، يرجى اختيار رابط آخر.',
+
+            'company_cr.required' => 'يرجى إدخال رقم السجل التجاري المعتمد.',
+            'company_cr.string' => 'رقم السجل التجاري يجب أن يكون نصاً أو رقماً صالحاً.',
+            'company_cr.max' => 'رقم السجل التجاري يجب ألا يتجاوز 20 حرفاً.',
+            'company_cr.unique' => 'رقم السجل التجاري مسجل مسبقاً لمنشأة أخرى.',
+
+            'email.required' => 'يرجى إدخال البريد الإلكتروني الرسمي للمنشأة.',
+            'email.email' => 'البريد الإلكتروني للمنشأة غير صالح.',
+            'email.unique' => 'البريد الإلكتروني للمنشأة مسجل مسبقاً.',
+
+            'phone.required' => 'يرجى إدخال رقم الهاتف المعتمد للمنشأة.',
+            'phone.string' => 'رقم الهاتف يجب أن يكون نصاً صالحاً.',
+            'phone.max' => 'رقم الهاتف يجب ألا يتجاوز 20 حرفاً.',
+
+            // بيانات المدير
+            'admin_name.required' => 'يرجى إدخال الاسم الكامل لمدير المنشأة.',
+            'admin_name.string' => 'اسم المدير يجب أن يكون نصاً صالحاً.',
+            'admin_name.max' => 'اسم المدير يجب ألا يتجاوز 255 حرفاً.',
+
+            'admin_email.required' => 'يرجى إدخال البريد الإلكتروني لتسجيل دخول مدير المنشأة.',
+            'admin_email.email' => 'بريد مدير المنشأة غير صالح.',
+            'admin_email.unique' => 'بريد المدير مستخدم بالفعل لحساب آخر في النظام.',
+
+            'admin_password.required' => 'يرجى تحديد كلمة المرور الأولية لحساب المدير.',
+            'admin_password.min' => 'كلمة المرور يجب ألا تقل عن 8 خانات لضمان الأمان.',
+
+            // بيانات الاشتراك
+            'plan_id.required' => 'يرجى اختيار باقة الاشتراك للمنشأة.',
+            'plan_id.exists' => 'باقة الاشتراك المحددة غير موجودة في النظام.',
+
+            'billing_cycle.required' => 'يرجى تحديد دورة الفوترة (شهري أو سنوي).',
+            'billing_cycle.in' => 'دورة الفوترة المحددة غير صالحة.',
+        ];
+    }
+}
