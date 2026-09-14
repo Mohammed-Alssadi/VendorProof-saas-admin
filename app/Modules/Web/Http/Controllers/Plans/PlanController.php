@@ -56,7 +56,7 @@ class PlanController extends Controller
      */
     public function show(Plan $plan)
     {
-        $plan->load(['prices', 'features']);
+        $plan->load(['prices', 'features'])->loadCount('tenants');
         extract($this->getDividedFeatures());
 
         return view('plans.show', compact('plan', 'limits', 'features'));

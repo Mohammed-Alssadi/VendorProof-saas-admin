@@ -105,6 +105,12 @@
                                 <span>سجلات الاشتراكات</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('payments.index') }}" class="nav-link {{ request()->routeIs('payments.*') ? 'active' : '' }}">
+                                <i class="ri-bank-card-line"></i>
+                                <span>المدفوعات</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
 

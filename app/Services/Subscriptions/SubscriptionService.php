@@ -6,6 +6,7 @@ use App\Models\Tenant;
 use App\Modules\Web\Models\Plan;
 use App\Modules\Web\Models\PlanPrice;
 use App\Modules\Web\Models\Subscription;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -15,6 +16,34 @@ use Illuminate\Support\Facades\DB;
  */
 class SubscriptionService
 {
+    /**
+     * تفعيل باقة المنشأة وإلغاء أي اشتراكات سابقة نشطة وتحديد تاريخ الصلاحية ذرياً.
+     */
+    public function activatePlan(Tenant $tenant, Plan $plan, string $billingCycle = 'monthly', ?Carbon $expiresAt = null): Subscription
+    {
+        return DB::transaction(function () use ($tenant, $plan, $billingCycle, $expiresAt) {
+            // 1. تحديث باقة المنشأة المباشرة
+            $tenant->update(['plan_id' => $plan->id]);
+
+            // 2. إلغاء أي اشتراكات سابقة نشطة لتفادي الازدواجية
+            $tenant->subscriptions()
+                ->where('status', 'active')
+                ->update(['status' => 'canceled']);
+
+            // 3. إنشاء سجل الاشتراك الجديد
+            $subscription = $this->createSubscription($tenant, $plan, $billingCycle);
+
+            // 4. تعيين تاريخ انتهاء مخصص (مثل فترات الدفع المسبق لسترايب)
+            if ($expiresAt) {
+                $subscription->update(['current_period_end' => $expiresAt]);
+            }
+
+            $tenant->refresh();
+
+            return $subscription;
+        });
+    }
+
     /**
      * الدالة المركزية الوحيدة لإنشاء عقد اشتراك رسمي للمنشأة في قاعدة البيانات.
      */
@@ -49,7 +78,8 @@ class SubscriptionService
      */
     public function getCurrentSubscriptionDetails(Tenant $tenant): array
     {
-        $tenant->loadMissing(['plan', 'currentSubscription.planPrice']);
+        $tenant->refresh();
+        $tenant->load(['plan', 'currentSubscription.planPrice']);
 
         $subscription = $tenant->currentSubscription;
         $planPrice = $subscription?->planPrice;
@@ -70,30 +100,14 @@ class SubscriptionService
         ];
     }
 
-
-
     /**
      * ترقية أو تغيير باقة المنشأة بشكل ذري آمن.
      */
     public function upgrade(Tenant $tenant, Plan $newPlan, PlanPrice $planPrice): array
     {
-        return DB::transaction(function () use ($tenant, $newPlan, $planPrice) {
-            // 1. تحديث معرف باقة المنشأة المباشر
-            $tenant->update(['plan_id' => $newPlan->id]);
+        $this->activatePlan($tenant, $newPlan, $planPrice->billing_cycle);
 
-            // 2. إلغاء أي اشتراكات سابقة نشطة لتفادي الازدواجية
-            $tenant->subscriptions()
-                ->where('status', 'active')
-                ->update(['status' => 'canceled']);
-
-            // 3. إنشاء الاشتراك الجديد عبر الدالة المركزية
-            $this->createSubscription($tenant, $newPlan, $planPrice->billing_cycle);
-
-            // 4. إرجاع تفاصيل الاشتراك والباقة المحدثة بالهيكل المعياري الموحد
-            $tenant->refresh();
-
-            return $this->getCurrentSubscriptionDetails($tenant);
-        });
+        return $this->getCurrentSubscriptionDetails($tenant);
     }
 
     /**

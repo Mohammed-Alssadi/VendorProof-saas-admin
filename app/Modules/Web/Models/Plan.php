@@ -2,6 +2,7 @@
 
 namespace App\Modules\Web\Models;
 
+use App\Models\Payment;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -55,6 +56,17 @@ class Plan extends Model
     public function yearlyPrice(): HasOne
     {
         return $this->hasOne(PlanPrice::class)->where('billing_cycle', 'yearly');
+    }
+
+    /**
+     * جلب السعر الفعلي النشط للباقة لدورة فوترة محددة (monthly أو yearly).
+     */
+    public function activePriceFor(string $cycle): ?PlanPrice
+    {
+        return $this->prices()
+            ->where('billing_cycle', $cycle)
+            ->where('status', 'active')
+            ->first();
     }
 
     public function features(): BelongsToMany
@@ -135,21 +147,17 @@ class Plan extends Model
         return $this->hasMany(Tenant::class, 'plan_id');
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     /**
      * عدد المنشآت المشتركة في هذه الباقة مباشرة.
      */
     public function getTenantsCountAttribute(): int
     {
-        if (array_key_exists('tenants_count', $this->attributes)) {
-            return (int) $this->attributes['tenants_count'];
-        }
-
-        $directCount = $this->tenants()->count();
-        if ($directCount > 0) {
-            return $directCount;
-        }
-
-        return $this->subscriptions()->distinct()->count('subscriptions.tenant_id');
+        return (int) ($this->attributes['tenants_count'] ?? $this->tenants()->count());
     }
 
     /**

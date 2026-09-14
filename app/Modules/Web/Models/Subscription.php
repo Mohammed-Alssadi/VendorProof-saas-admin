@@ -81,14 +81,4 @@ class Subscription extends Model
     {
         return $this->trial_ends_at !== null && $this->trial_ends_at->isFuture();
     }
-
-    public function getBillingCycleArabicAttribute(): string
-    {
-        return $this->planPrice?->billing_cycle === 'yearly' ? 'سنوي' : 'شهري';
-    }
-
-    public function getPriceAttribute(): float
-    {
-        return (float) ($this->planPrice?->price ?? 0);
-    }
 }

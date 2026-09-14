@@ -3,8 +3,9 @@
 namespace App\Modules\Api\Http\Controllers\Subscription;
 
 use App\Modules\Api\Http\Controllers\ApiController;
-use App\Modules\Api\Http\Requests\Subscription\UpgradeSubscriptionRequest;
+use App\Modules\Api\Http\Requests\Subscription\CheckoutSubscriptionRequest;
 use App\Modules\Web\Models\Plan;
+use App\Services\Payments\StripePaymentService;
 use App\Services\Subscriptions\SubscriptionService;
 use Illuminate\Http\Request;
 
@@ -33,12 +34,9 @@ class ApiSubscriptionController extends ApiController
     }
 
     /**
-     * Upgrade tenant to a new subscription tier.
-     *
-     * Atomically switches tenant plan, updates active subscription billing
-     * cycle and period dates, and unlocks new tier capabilities immediately.
+     * Create a Stripe Checkout session for tenant plan upgrade.
      */
-    public function upgrade(UpgradeSubscriptionRequest $request, SubscriptionService $subscriptionService)
+    public function checkout(CheckoutSubscriptionRequest $request, StripePaymentService $stripeService)
     {
         $tenant = $request->user()?->tenant;
 
@@ -46,25 +44,24 @@ class ApiSubscriptionController extends ApiController
             return $this->errorResponse('حساب المنشأة غير نشط أو غير موجود.', 403);
         }
 
-        $newPlan = Plan::where('status', 'active')->find($request->plan_id);
+        $newPlan = Plan::active()->find($request->plan_id);
 
         if (! $newPlan) {
             return $this->errorResponse('الباقة المختارة غير متاحة حالياً.', 422);
         }
 
-        // Prevent redundant upgrade to the current plan
-        if ((int) $tenant->plan_id === (int) $newPlan->id) {
-            return $this->errorResponse('أنت مشترك بالفعل في هذه الباقة.', 422, [
-                'plan_id' => ['أنت مشترك بالفعل في هذه الباقة.'],
-            ]);
+        if ($newPlan->id === $tenant->plan_id) {
+            return $this->errorResponse('المنشأة مشتركة بالفعل في هذه الباقة.', 422);
+        }
+
+        // Prevent checkout for free plan
+        if ($newPlan->isFree()) {
+            return $this->errorResponse('الباقة المجانية لا تتطلب دفعاً مالياً.', 422);
         }
 
         // Locate real plan price record for requested cycle
         $billingCycle = $request->billing_cycle ?? 'monthly';
-        $planPrice = $newPlan->prices()
-            ->where('billing_cycle', $billingCycle)
-            ->where('status', 'active')
-            ->first();
+        $planPrice = $newPlan->activePriceFor($billingCycle);
 
         if (! $planPrice) {
             return $this->errorResponse('خيار الفوترة المحدد غير متاح لهذه الباقة.', 422, [
@@ -72,9 +69,21 @@ class ApiSubscriptionController extends ApiController
             ]);
         }
 
-        $result = $subscriptionService->upgrade($tenant, $newPlan, $planPrice);
+        $defaultFrontendUrl = config('app.frontend_url') ?: 'http://localhost:3000';
+        $successUrl = $request->success_url ?? $defaultFrontendUrl . '/billing?status=success';
+        $cancelUrl  = $request->cancel_url ?? $defaultFrontendUrl . '/pricing?status=canceled';
 
-        return $this->successResponse($result, 'تمت ترقية باقة المنشأة بنجاح.');
+        $checkoutUrl = $stripeService->createCheckoutSession(
+            $tenant,
+            $newPlan,
+            $planPrice,
+            $successUrl,
+            $cancelUrl
+        );
+
+        return $this->successResponse([
+            'checkout_url' => $checkoutUrl,
+        ], 'تم إنشاء جلسة الدفع بنجاح.');
     }
 
     /**

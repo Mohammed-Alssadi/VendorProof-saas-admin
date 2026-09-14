@@ -14,11 +14,21 @@ use App\Modules\Web\Models\Plan;
 trait HasPlanFeatures
 {
     /**
-     * جلب الباقة الحالية المفعلة للمنشأة (مباشرة عبر plan أو الاشتراك).
+     * جلب الباقة الحالية المفعلة للمنشأة (مباشرة عبر plan أو الاشتراك مع حماية انتهاء الصلاحية).
      */
     public function currentPlan(): ?Plan
     {
-        return $this->plan ?? $this->currentSubscription?->planPrice?->plan;
+        $plan = $this->plan ?? $this->currentSubscription?->planPrice?->plan;
+
+        // حماية انتهاء الصلاحية: إذا كانت الباقة مدفوعة ولكن الاشتراك منتهٍ تعود للباقة المجانية
+        if ($plan && $plan->isPaid()) {
+            $subscription = $this->currentSubscription;
+            if (! $subscription || ! $subscription->isActive()) {
+                return Plan::defaultFree();
+            }
+        }
+
+        return $plan ?? Plan::defaultFree();
     }
 
     /**
@@ -65,14 +75,6 @@ trait HasPlanFeatures
         }
 
         return $currentCount >= $limit;
-    }
-
-    /**
-     * فحص ديناميكي إيجابي: هل ما زال بإمكان المنشأة استهلاك المزيد من هذه الميزة؟
-     */
-    public function canUseMore(string $featureKey, int $currentCount): bool
-    {
-        return ! $this->hasReachedLimit($featureKey, $currentCount);
     }
 
     /**

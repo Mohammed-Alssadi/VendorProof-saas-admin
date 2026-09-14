@@ -39,24 +39,4 @@ class PlanFeature extends Pivot
     {
         return $this->belongsTo(Feature::class);
     }
-
-    /**
-     * فحص هل القيمة تمثل حداً تشغيلياً غير محدود (-1 أو unlimited).
-     */
-    public function isUnlimited(): bool
-    {
-        return $this->value === '-1' || $this->value === 'unlimited';
-    }
-
-    /**
-     * عرض القيمة كنص مفهوم (مثال: "غير محدود" بدلاً من -1، أو الرقم النقي).
-     */
-    public function displayValue(string $unlimitedLabel = 'غير محدود'): string
-    {
-        if ($this->isUnlimited()) {
-            return $unlimitedLabel;
-        }
-
-        return (string) ($this->value ?? '0');
-    }
 }

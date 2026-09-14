@@ -6,6 +6,7 @@ use App\Modules\Api\Http\Controllers\Company\ApiCompanyController;
 use App\Modules\Api\Http\Controllers\Plans\ApiPlanController;
 use App\Modules\Api\Http\Controllers\Profile\ApiProfileController;
 use App\Modules\Api\Http\Controllers\Subscription\ApiSubscriptionController;
+use App\Modules\Api\Http\Controllers\Webhooks\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,13 +26,16 @@ Route::prefix('v1')->group(function () {
     // 1. مسارات الضيوف العامة (صفحة الهبوط والتسعير)
     Route::get('/plans', [ApiPlanController::class, 'index']);
 
-    // 2. مسارات المصادقة مع حماية التخمين
+    // 2. مسار إشعارات الويب هوك من سترايب (متاح للعامة ومحمي بالتوقيع الرقمي)
+    Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
+
+    // 3. مسارات المصادقة مع حماية التخمين
     Route::middleware('throttle:10,1')->group(function () {
         Route::post('/register', [ApiTenantRegistrationController::class, 'register']);
         Route::post('/login', [ApiAuthController::class, 'login']);
     });
 
-    // 2. مسارات العميل المحمية بواسطة التوكن الرقمي (Sanctum Token)
+    // 4. مسارات العميل المحمية بواسطة التوكن الرقمي (Sanctum Token)
     Route::middleware('auth:sanctum')->group(function () {
         // فحص الجلسة والاشتراك
         Route::get('/me', [ApiAuthController::class, 'me']);
@@ -46,9 +50,9 @@ Route::prefix('v1')->group(function () {
         Route::put('/company', [ApiCompanyController::class, 'update']);
         Route::delete('/company', [ApiCompanyController::class, 'destroy']);
 
-        // إدارة واشتراكات المنشأة
+        // إدارة واشتراكات المنشأة (جلسة الدفع والإلغاء)
         Route::get('/subscription', [ApiSubscriptionController::class, 'show']);
-        Route::post('/subscription/upgrade', [ApiSubscriptionController::class, 'upgrade']);
+        Route::post('/subscription/checkout', [ApiSubscriptionController::class, 'checkout']);
         Route::post('/subscription/cancel', [ApiSubscriptionController::class, 'cancel']);
     });
 });

@@ -188,7 +188,75 @@
 
         if (featSearch) featSearch.addEventListener('input', filterFeatures);
         if (featType) featType.addEventListener('change', filterFeatures);
+
+        // 4. فلترة جدول المدفوعات والعمليات المالية (Payments Table)
+        const paymentSearch = document.getElementById('paymentSearchInput');
+        const paymentStatus = document.getElementById('paymentStatusFilter');
+        const paymentCycle = document.getElementById('paymentCycleFilter');
+        const paymentTable = document.getElementById('paymentsDataTable');
+        const paymentTbody = paymentTable ? paymentTable.querySelector('tbody') : null;
+
+        function filterPayments() {
+            if (!paymentTbody) return;
+            const rows = paymentTbody.querySelectorAll('tr:not(.table-no-results-row):not(.table-empty-row)');
+            const query = paymentSearch ? paymentSearch.value.toLowerCase().trim() : '';
+            const status = paymentStatus ? paymentStatus.value : 'all';
+            const cycle = paymentCycle ? paymentCycle.value : 'all';
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                const rowStatus = row.getAttribute('data-status');
+                const rowCycle = row.getAttribute('data-cycle');
+
+                const matchesQuery = query === '' || text.includes(query);
+                const matchesStatus = status === 'all' || rowStatus === status;
+                const matchesCycle = cycle === 'all' || rowCycle === cycle;
+
+                if (matchesQuery && matchesStatus && matchesCycle) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            updateNoResultsState(paymentTbody, visibleCount, 8, resetPayments);
+        }
+
+        function resetPayments() {
+            if (paymentSearch) paymentSearch.value = '';
+            if (paymentStatus) paymentStatus.value = 'all';
+            if (paymentCycle) paymentCycle.value = 'all';
+            filterPayments();
+        }
+
+        if (paymentSearch) paymentSearch.addEventListener('input', filterPayments);
+        if (paymentStatus) paymentStatus.addEventListener('change', filterPayments);
+        if (paymentCycle) paymentCycle.addEventListener('change', filterPayments);
     }
+
+    // نسخ المرجع بنقرة واحدة (Copy Reference Handler)
+    document.addEventListener('click', function (e) {
+        const copyBtn = e.target.closest('.js-copy-ref');
+        if (!copyBtn) return;
+
+        const textToCopy = copyBtn.getAttribute('data-copy');
+        if (!textToCopy) return;
+
+        navigator.clipboard.writeText(textToCopy).then(function () {
+            const icon = copyBtn.querySelector('i');
+            if (icon) {
+                const orig = icon.className;
+                icon.className = 'ri-check-line';
+                copyBtn.style.color = 'var(--color-success)';
+                setTimeout(function () {
+                    icon.className = orig;
+                    copyBtn.style.color = '';
+                }, 1500);
+            }
+        });
+    });
 
     document.addEventListener('DOMContentLoaded', initTableFilters);
 })();

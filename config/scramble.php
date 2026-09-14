@@ -77,7 +77,7 @@ return [
             'hideTryIt' => false,
             'hideSchemas' => false,
             'logo' => '',
-            'tryItCredentialsPolicy' => 'include',
+            'tryItCredentialsPolicy' => 'same-origin',
             'layout' => 'responsive',
             'router' => 'hash',
         ],

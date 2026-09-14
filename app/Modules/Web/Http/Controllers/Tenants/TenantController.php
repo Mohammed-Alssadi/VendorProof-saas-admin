@@ -60,31 +60,24 @@ class TenantController extends Controller
             ->with('success', 'تم تسجيل المنشأة وتفعيل حساب المدير بنجاح.');
     }
 
-    public function show(string|int $id)
+    public function show(Tenant $tenant)
     {
-        $tenant = Tenant::with(['plan.features', 'currentSubscription.planPrice', 'users'])->find($id);
-
-        if (! $tenant) {
-            return redirect()->route('tenants.index')
-                ->with('error', 'لم يتم العثور على سجل المنشأة المطلوبة');
-        }
+        $tenant->loadMissing(['plan.features', 'currentSubscription.planPrice', 'users']);
 
         return view('tenants.show', compact('tenant'));
     }
 
-    public function edit(string|int $id)
+    public function edit(Tenant $tenant)
     {
-        $tenant = Tenant::with(['plan', 'currentSubscription.planPrice'])->findOrFail($id);
+        $tenant->loadMissing(['plan', 'currentSubscription.planPrice']);
         $plans = Plan::active()->with('prices')->get();
         $currentBillingCycle = $tenant->currentSubscription?->planPrice?->billing_cycle ?? 'monthly';
 
         return view('tenants.edit', compact('tenant', 'plans', 'currentBillingCycle'));
     }
 
-    public function update(UpdateTenantRequest $request, string|int $id, TenantService $tenantService)
+    public function update(UpdateTenantRequest $request, Tenant $tenant, TenantService $tenantService)
     {
-        $tenant = Tenant::findOrFail($id);
-
         $tenantService->updateTenant(
             $tenant,
             $request->validated(),
@@ -99,9 +92,8 @@ class TenantController extends Controller
     /**
      * تبديل الحالة التشغيلية للمنشأة (نشط / معلق).
      */
-    public function toggleStatus(string|int $id)
+    public function toggleStatus(Tenant $tenant)
     {
-        $tenant = Tenant::findOrFail($id);
         $newStatus = $tenant->isActive() ? 'suspended' : 'active';
         $tenant->update(['status' => $newStatus]);
 
@@ -115,9 +107,8 @@ class TenantController extends Controller
     /**
      * أرشفة سجل المنشأة من النظام.
      */
-    public function destroy(string|int $id)
+    public function destroy(Tenant $tenant)
     {
-        $tenant = Tenant::findOrFail($id);
         $tenant->delete();
 
         return redirect()->route('tenants.index')

@@ -6,6 +6,8 @@ use App\Models\Tenant;
 use App\Modules\Api\Models\User;
 use App\Modules\Web\Models\Feature;
 use App\Modules\Web\Models\Plan;
+use App\Services\Payments\StripePaymentService;
+use App\Services\Subscriptions\SubscriptionService;
 use App\Services\Tenants\TenantService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -352,12 +354,10 @@ class TenantProvisioningTest extends TestCase
         $this->assertFalse($tenant->canUseFeature('non_existing_feature'));
         $this->assertEquals(5, $tenant->getFeatureLimit('vendors_limit'));
 
-        // فحص الدوال العامة للحدود hasReachedLimit و canUseMore
+        // فحص الدوال العامة للحدود hasReachedLimit
         $this->assertFalse($tenant->hasReachedLimit('vendors_limit', 3));
         $this->assertTrue($tenant->hasReachedLimit('vendors_limit', 5));
         $this->assertTrue($tenant->hasReachedLimit('vendors_limit', 6));
-        $this->assertTrue($tenant->canUseMore('vendors_limit', 3));
-        $this->assertFalse($tenant->canUseMore('vendors_limit', 5));
 
         // فحص الحدود الديناميكية dynamicLimits
         $dynamicLimits = $plan->dynamicLimits();
@@ -491,30 +491,35 @@ class TenantProvisioningTest extends TestCase
         $cancelFreeResponse->assertStatus(422);
         $cancelFreeResponse->assertJsonPath('success', false);
 
-        // 5. محاولة الترقية لنفس الباقة الحالية -> يجب أن تفشل بكود 422
+        // 5. محاولة طلب الدفع لنفس الباقة الحالية -> يجب أن تفشل بكود 422
         $freePlanId = $regResponse->json('data.tenant.plan.id');
-        $redundantUpgrade = $this->withHeader('Authorization', 'Bearer '.$token)
-            ->postJson('/api/v1/subscription/upgrade', [
+        $redundantCheckout = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/v1/subscription/checkout', [
                 'plan_id'       => $freePlanId,
                 'billing_cycle' => 'monthly',
             ]);
 
-        $redundantUpgrade->assertStatus(422);
+        $redundantCheckout->assertStatus(422);
 
-        // 6. الترقية الناجحة للباقة الاحترافية بدورة سنوية
-        $successUpgrade = $this->withHeader('Authorization', 'Bearer '.$token)
-            ->postJson('/api/v1/subscription/upgrade', [
+        // 6. طلب جلسة دفع Stripe ناجحة للباقة الاحترافية بدورة سنوية
+        $mockStripe = $this->mock(StripePaymentService::class);
+        $mockStripe->shouldReceive('createCheckoutSession')
+            ->once()
+            ->andReturn('https://checkout.stripe.com/c/pay/cs_test_mock123');
+
+        $checkoutResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/v1/subscription/checkout', [
                 'plan_id'       => $proPlan->id,
                 'billing_cycle' => 'yearly',
             ]);
 
-        $successUpgrade->assertStatus(200);
-        $successUpgrade->assertJsonPath('success', true);
-        $successUpgrade->assertJsonPath('data.tenant.plan.slug', 'pro');
-        $successUpgrade->assertJsonPath('data.subscription.status', 'active');
-        $successUpgrade->assertJsonPath('data.subscription.billing_cycle', 'yearly');
-        $successUpgrade->assertJsonPath('data.subscription.price', '2990.00');
-        $this->assertNotNull($successUpgrade->json('data.subscription.current_period_end'));
+        $checkoutResponse->assertStatus(200);
+        $checkoutResponse->assertJsonPath('success', true);
+        $checkoutResponse->assertJsonPath('data.checkout_url', 'https://checkout.stripe.com/c/pay/cs_test_mock123');
+
+        // ترقية الاشتراك بعد نجاح الدفع عبر السيرفز المركزي
+        $tenant = Tenant::where('slug', 'sub-test-co')->first();
+        app(SubscriptionService::class)->activatePlan($tenant, $proPlan, 'yearly');
 
         // 7. استعراض تفاصيل الاشتراك بعد الترقية
         $showAfterUpgrade = $this->withHeader('Authorization', 'Bearer '.$token)

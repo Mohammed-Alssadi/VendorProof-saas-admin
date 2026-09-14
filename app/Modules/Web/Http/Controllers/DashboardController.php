@@ -2,6 +2,7 @@
 
 namespace App\Modules\Web\Http\Controllers;
 
+use App\Models\Payment;
 use App\Models\Tenant;
 use App\Modules\Web\Models\Plan;
 use Illuminate\Support\Carbon;
@@ -119,6 +120,7 @@ class DashboardController extends Controller
 
         // 3. أحدث المنشآت المسجلة ونشاطات المنصة الحقيقية
         $latestTenants = Tenant::with('plan')->latest()->take(5)->get();
+        $latestPayments = Payment::with(['tenant', 'plan'])->latest()->take(5)->get();
 
         $activityFeed = $latestTenants->map(function ($tenant) {
             return [
@@ -135,6 +137,7 @@ class DashboardController extends Controller
             'revenueChartData',
             'billingDistribution',
             'latestTenants',
+            'latestPayments',
             'activityFeed'
         ));
     }

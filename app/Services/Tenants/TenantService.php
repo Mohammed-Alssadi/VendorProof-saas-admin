@@ -88,10 +88,9 @@ class TenantService
                 'status'     => $data['status'] ?? $tenant->status,
             ]);
 
-            // 2. تحديث الاشتراك الرسمي للمنشأة بسطرين مباشرين
+            // 2. تحديث اشتراك المنشأة وتفعيل الباقة عبر السيرفز المركزي
             if ($planId && $newPlan = Plan::find($planId)) {
-                $tenant->subscriptions()->where('status', 'active')->update(['status' => 'canceled']);
-                $this->subscriptionService->createSubscription($tenant, $newPlan, $billingCycle);
+                $this->subscriptionService->activatePlan($tenant, $newPlan, $billingCycle);
             }
 
             return $tenant->refresh();

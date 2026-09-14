@@ -47,14 +47,4 @@ class Feature extends Model
     {
         return $this->type === 'feature';
     }
-
-    public function scopeLimits($query)
-    {
-        return $query->where('type', 'limit');
-    }
-
-    public function scopeFeatures($query)
-    {
-        return $query->where('type', 'feature');
-    }
 }

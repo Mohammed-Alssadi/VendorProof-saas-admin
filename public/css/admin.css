@@ -1127,7 +1127,8 @@ body.auth-page {
     display: inline-block;
 }
 
-.status-pill.active .status-dot {
+.status-pill.active .status-dot,
+.status-pill.paid .status-dot {
     background-color: var(--color-success);
 }
 
@@ -1141,8 +1142,13 @@ body.auth-page {
 }
 
 .status-pill.canceled .status-dot,
+.status-pill.failed .status-dot,
 .status-pill.suspended .status-dot {
     background-color: var(--color-danger);
+}
+
+.status-pill.refunded .status-dot {
+    background-color: #64748b;
 }
 
 /* شارات المؤشرات المحسنة برحابة ووضوح تام */
@@ -3419,6 +3425,188 @@ body.auth-page {
         padding: 0.75rem;
     }
 }
+
+/* ==========================================================================
+   Payments Module & High-Density Ledger Components
+   ========================================================================== */
+
+.ref-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.81rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+    background-color: var(--color-surface-hover);
+    padding: 0.25rem 0.55rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    direction: ltr;
+}
+
+.ref-copy-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.15s ease;
+}
+
+.ref-copy-btn:hover {
+    color: var(--color-primary);
+}
+
+.payment-amount {
+    font-weight: 600;
+    color: var(--color-text-main);
+    white-space: nowrap;
+    font-size: 0.92rem;
+}
+
+.table-inline-stats {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.84rem;
+    color: var(--color-text-muted);
+    background-color: var(--color-surface-hover);
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+}
+
+.table-inline-stats strong {
+    color: var(--color-text-main);
+    font-weight: 600;
+}
+
+/* Payment Details Modal */
+.payment-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(9, 9, 11, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.payment-modal-backdrop.is-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.payment-modal-dialog {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 580px;
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    transform: scale(0.96) translateY(10px);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.payment-modal-backdrop.is-active .payment-modal-dialog {
+    transform: scale(1) translateY(0);
+}
+
+.payment-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.payment-modal-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.payment-modal-close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.payment-modal-close:hover {
+    color: var(--color-text-main);
+    background-color: var(--color-surface-hover);
+}
+
+.payment-modal-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+.modal-kv-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.modal-kv-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.modal-kv-label {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.modal-kv-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+
+.modal-section-divider {
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 0.25rem 0;
+}
+
+.payment-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-surface-hover);
+}
+
 
 
 

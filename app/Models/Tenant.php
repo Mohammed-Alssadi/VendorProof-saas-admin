@@ -77,6 +77,11 @@ class Tenant extends Model
             ->latestOfMany();
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class)->latest();
+    }
+
     /**
      * فحص هل المنشأة نشطة تشغيلياً.
      */

@@ -4,7 +4,6 @@ namespace App\Modules\Web\Http\Controllers\Subscriptions;
 
 use App\Models\Tenant;
 use App\Modules\Web\Http\Controllers\Controller;
-use App\Modules\Web\Models\Subscription;
 
 /**
  * متحكم استعراض سجلات وعقود الاشتراكات بالمنصة (Subscriptions Contract Controller).

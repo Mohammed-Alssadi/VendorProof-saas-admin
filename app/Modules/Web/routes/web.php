@@ -3,6 +3,7 @@
 use App\Modules\Web\Http\Controllers\Auth\AdminAuthController;
 use App\Modules\Web\Http\Controllers\DashboardController;
 use App\Modules\Web\Http\Controllers\Features\FeatureController;
+use App\Modules\Web\Http\Controllers\Payments\PaymentController;
 use App\Modules\Web\Http\Controllers\Plans\PlanController;
 use App\Modules\Web\Http\Controllers\ProfileController;
 use App\Modules\Web\Http\Controllers\Subscriptions\SubscriptionController;
@@ -64,4 +65,8 @@ Route::middleware('auth')->group(function () {
 
     // المشتركون وسجل الباقات
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+
+    // المدفوعات والفواتير
+    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
 });

@@ -207,6 +207,94 @@
         </div>
     </div>
 </div>
+
+<!-- 5. قسم أحدث العمليات المالية المكتملة -->
+<div class="card-panel" style="margin-top: 1.5rem;">
+    <div class="card-panel-header">
+        <div>
+            <div class="card-panel-title">أحدث العمليات المالية</div>
+            <div class="card-panel-subtitle">سجل بالتحصيلات والاشتراكات المعتمدة عبر بوابات الدفع الإلكتروني</div>
+        </div>
+        <a href="{{ route('payments.index') }}" class="card-panel-link">
+            <span>عرض كافة المدفوعات</span>
+            <i class="ri-arrow-left-line"></i>
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>المرجع</th>
+                    <th>المنشأة</th>
+                    <th>الباقة المعتمدة</th>
+                    <th>المبلغ المسدد</th>
+                    <th>بوابة الدفع</th>
+                    <th>الحالة</th>
+                    <th>تاريخ العملية</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($latestPayments as $payment)
+                    <tr>
+                        <td>
+                            @if($payment->gateway_reference_id)
+                                <span class="ref-badge" title="{{ $payment->gateway_reference_id }}">
+                                    <span>{{ \Illuminate\Support\Str::limit($payment->gateway_reference_id, 16) }}</span>
+                                </span>
+                            @else
+                                <span class="ref-badge">
+                                    <span>{{ substr($payment->id, 0, 8) }}...</span>
+                                </span>
+                            @endif
+                        </td>
+                        <td>
+                            <div class="subscriber-cell">
+                                <div class="subscriber-avatar">{{ mb_substr($payment->tenant?->name ?? '—', 0, 1) }}</div>
+                                <div class="subscriber-name">{{ $payment->tenant?->name ?? '—' }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="trend-badge trend-stable">
+                                <i class="ri-vip-diamond-line"></i>
+                                <span>{{ $payment->plan?->name ?? '—' }}</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="payment-amount">{{ $payment->formattedAmount() }}</span>
+                        </td>
+                        <td>
+                            <span class="trend-badge trend-stable">
+                                <i class="ri-bank-card-line"></i>
+                                <span>{{ ucfirst($payment->gateway) }}</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-pill {{ $payment->status }}">
+                                <span class="status-dot"></span>
+                                <span>{{ $payment->statusLabelArabic() }}</span>
+                            </span>
+                        </td>
+                        <td class="date-cell">
+                            {{ $payment->paid_at ? $payment->paid_at->format('Y/m/d - H:i') : ($payment->created_at ? $payment->created_at->format('Y/m/d - H:i') : '—') }}
+                        </td>
+                    </tr>
+                @empty
+                    <tr class="table-empty-row">
+                        <td colspan="7">
+                            <div class="table-empty-wrap">
+                                <div class="empty-icon-box">
+                                    <i class="ri-bank-card-line"></i>
+                                </div>
+                                <h4 class="empty-title">لا توجد عمليات دفع مسجلة بعد</h4>
+                                <p class="empty-desc">ستظهر هنا العمليات والتحصيلات فور سداد المنشآت لاشتراكاتها.</p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
