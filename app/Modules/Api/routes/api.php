@@ -6,6 +6,7 @@ use App\Modules\Api\Http\Controllers\Company\ApiCompanyController;
 use App\Modules\Api\Http\Controllers\Plans\ApiPlanController;
 use App\Modules\Api\Http\Controllers\Profile\ApiProfileController;
 use App\Modules\Api\Http\Controllers\Subscription\ApiSubscriptionController;
+use App\Modules\Api\Http\Controllers\Vendors\ApiVendorCategoryController;
 use App\Modules\Api\Http\Controllers\Webhooks\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,5 +55,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/subscription', [ApiSubscriptionController::class, 'show']);
         Route::post('/subscription/checkout', [ApiSubscriptionController::class, 'checkout']);
         Route::post('/subscription/cancel', [ApiSubscriptionController::class, 'cancel']);
+
+        // تصنيفات الموردين للمنشأة
+        Route::apiResource('vendor-categories', ApiVendorCategoryController::class);
     });
 });

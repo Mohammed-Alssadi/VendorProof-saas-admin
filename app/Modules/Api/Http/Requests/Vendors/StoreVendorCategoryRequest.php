@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Modules\Api\Http\Requests\Vendors;
+
+use App\Modules\Api\Http\Requests\ApiRequest;
+use Illuminate\Validation\Rule;
+
+class StoreVendorCategoryRequest extends ApiRequest
+{
+    public function rules(): array
+    {
+        return [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('vendor_categories')->where('tenant_id', $this->user()->tenant_id),
+            ],
+            'description' => ['nullable', 'string'],
+            'is_active'   => ['nullable', 'boolean'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required'     => 'اسم التصنيف مطلوب.',
+            'name.string'       => 'اسم التصنيف يجب أن يكون نصاً صالحاً.',
+            'name.max'          => 'اسم التصنيف يجب ألا يتجاوز 255 حرفاً.',
+            'name.unique'       => 'اسم التصنيف مسجل مسبقاً لدى منشأتكم.',
+            'is_active.boolean' => 'حالة التفعيل يجب أن تكون قيمة منطقية.',
+        ];
+    }
+}
