@@ -9,14 +9,15 @@ use App\Modules\Api\Models\Vendors\VendorCategory;
 use Illuminate\Http\JsonResponse;
 
 /**
- * متحكم واجهات تصنيفات الموردين (Vendor Categories API Controller).
+ * Manage vendor classification categories for the authenticated tenant.
  *
- * يعتمد على Route Model Binding وبساطة الكود ونظافته.
+ * Tenant isolation is enforced automatically via BelongsToTenant.
+ * Route Model Binding restricts single-resource operations to owned records.
  */
 class ApiVendorCategoryController extends ApiController
 {
     /**
-     * جلب كافة تصنيفات الموردين للمنشأة.
+     * List all vendor categories belonging to the authenticated tenant.
      */
     public function index(): JsonResponse
     {
@@ -26,7 +27,7 @@ class ApiVendorCategoryController extends ApiController
     }
 
     /**
-     * حفظ تصنيف موردين جديد.
+     * Create a new vendor category.
      */
     public function store(StoreVendorCategoryRequest $request): JsonResponse
     {
@@ -36,7 +37,7 @@ class ApiVendorCategoryController extends ApiController
     }
 
     /**
-     * عرض تفاصيل تصنيف محدد (Route Model Binding).
+     * Retrieve a single vendor category.
      */
     public function show(VendorCategory $vendorCategory): JsonResponse
     {
@@ -44,7 +45,7 @@ class ApiVendorCategoryController extends ApiController
     }
 
     /**
-     * تحديث بيانات التصنيف (Route Model Binding).
+     * Update vendor category details.
      */
     public function update(UpdateVendorCategoryRequest $request, VendorCategory $vendorCategory): JsonResponse
     {
@@ -54,7 +55,7 @@ class ApiVendorCategoryController extends ApiController
     }
 
     /**
-     * حذف التصنيف (Route Model Binding).
+     * Permanently delete a vendor category.
      */
     public function destroy(VendorCategory $vendorCategory): JsonResponse
     {

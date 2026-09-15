@@ -8,22 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * Plan pricing tier model (monthly / yearly).
- *
- * @property int $id
- * @property int $plan_id
- * @property string $price
- * @property string $currency
- * @property string $billing_cycle
- * @property string $status
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- *
- * @property-read \App\Modules\Web\Models\Plan $plan
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Modules\Web\Models\Subscription> $subscriptions
- */
 class PlanPrice extends Model
 {
     use HasFactory, SoftDeletes;
@@ -53,7 +37,7 @@ class PlanPrice extends Model
     }
 
     /**
-     * ترجمة كود الآيزو للعملة إلى رمز العرض المالي الاحترافي.
+     * Map currency ISO code to display symbol.
      */
     public static function getCurrencySymbol(?string $currency): string
     {
@@ -71,16 +55,13 @@ class PlanPrice extends Model
         };
     }
 
-    /**
-     * خاصية مشتقة للحصول على رمز العملة الفعلي لهذا السعر.
-     */
     public function getCurrencySymbolAttribute(): string
     {
         return self::getCurrencySymbol($this->currency);
     }
 
     /**
-     * Return formatted price string with dynamic currency symbol.
+     * Return formatted price string with currency symbol.
      */
     public function formattedPrice(): string
     {

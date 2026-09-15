@@ -10,15 +10,10 @@ use App\Services\Subscriptions\SubscriptionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Stripe\Checkout\Session;
+use Stripe\PaymentIntent;
 use Stripe\Stripe;
 use Stripe\Webhook;
 
-/**
- * خدمة الدفع المركزية الخاصة بـ Stripe (Stripe Payment Service).
- *
- * تتولى حصرياً إنشاء جلسات الدفع لمرة واحدة (One-Time Checkout)
- * ومعالجة إشعارات السداد الآمنة (Webhooks) لتمديد فترة باقة المنشأة.
- */
 class StripePaymentService
 {
     public function __construct(protected SubscriptionService $subscriptionService)
@@ -30,11 +25,10 @@ class StripePaymentService
     }
 
     /**
-     * إنشاء سجل دفعة معلقة وتوليد رابط جلسة الدفع لمرة واحدة في سترايب (mode: payment).
+     * Create a pending payment record and generate a Stripe Checkout session URL.
      */
     public function createCheckoutSession(Tenant $tenant, Plan $plan, PlanPrice $planPrice, string $successUrl, string $cancelUrl)
     {
-        // 1. تسجيل العملية أولاً في قاعدة البيانات بحالة pending
         $payment = Payment::create([
             'tenant_id'     => $tenant->id,
             'plan_id'       => $plan->id,
@@ -46,13 +40,12 @@ class StripePaymentService
             'gateway'       => 'stripe',
         ]);
 
-        // 2. تحويل السعر إلى هللات/سنتات
         $unitAmount = (int) round((float) $planPrice->price * 100);
 
-        // 3. إنشاء جلسة الدفع في سترايب بنمط payment (دفع مسبق لمرة واحدة)
         $session = Session::create([
             'payment_method_types' => ['card'],
             'mode'                 => 'payment',
+            'locale'               => 'ar',
             'customer_email'       => $tenant->email,
             'client_reference_id'  => (string) $payment->id,
             'line_items'           => [
@@ -61,7 +54,7 @@ class StripePaymentService
                         'currency'     => strtolower($planPrice->currency ?? 'sar'),
                         'unit_amount'  => $unitAmount,
                         'product_data' => [
-                            'name'        => 'ترقية باقة '.$plan->name.' ('.($planPrice->billing_cycle === 'yearly' ? 'اشتراك سنوي' : 'اشتراك شهري').')',
+                            'name'        => 'ترقية '.$plan->name.' ('.($planPrice->billing_cycle === 'yearly' ? 'اشتراك سنوي' : 'اشتراك شهري').')',
                             'description' => 'منشأة: '.$tenant->name,
                         ],
                     ],
@@ -75,7 +68,6 @@ class StripePaymentService
             'cancel_url'  => $cancelUrl,
         ]);
 
-        // 4. حفظ معرف جلسة سترايب المبدئي
         $payment->update([
             'gateway_reference_id' => $session->id,
         ]);
@@ -84,7 +76,7 @@ class StripePaymentService
     }
 
     /**
-     * التحقق من التوقيع الرقمي للويب هوك واعتماد عملية السداد وتمديد صلاحية المنشأة.
+     * Verify Stripe webhook signature and process events.
      */
     public function handleWebhook(string $payload, string $sigHeader)
     {
@@ -98,7 +90,6 @@ class StripePaymentService
             return false;
         }
 
-        // معالجة حدث اكتمال جلسة الدفع بنجاح
         if ($event->type === 'checkout.session.completed') {
             /** @var Session $session */
             $session = $event->data->object;
@@ -109,7 +100,7 @@ class StripePaymentService
     }
 
     /**
-     * معالجة السداد وتحديث حالة الدفعة وتمديد تاريخ صلاحية الباقة في معاملة ذرية واحدة.
+     * Process successful payment and activate subscription plan.
      */
     protected function processPaymentSuccess(Session $session)
     {
@@ -121,12 +112,10 @@ class StripePaymentService
         DB::transaction(function () use ($paymentId, $session) {
             $payment = Payment::with(['tenant', 'plan'])->find($paymentId);
 
-            // التحقق من وجود الدفعة ومنع التكرار (Idempotency)
             if (! $payment || $payment->isPaid()) {
                 return;
             }
 
-            // تحديث حالة وسجل الدفعة
             $payment->update([
                 'status'               => 'paid',
                 'gateway_reference_id' => $session->payment_intent ?? $session->id,
@@ -135,28 +124,27 @@ class StripePaymentService
                 'paid_at'              => now(),
             ]);
 
-            // احتساب فترة الصلاحية وتفعيل الباقة عبر السيرفس المركزي
             $periodEnd = $payment->billing_cycle === 'yearly' ? now()->addYear() : now()->addMonth();
             $this->subscriptionService->activatePlan($payment->tenant, $payment->plan, $payment->billing_cycle, $periodEnd);
         });
     }
 
     /**
-     * جلب رابط سند السند الرسمي من سترايب بأسلوب نظيف ومباشر.
+     * Retrieve receipt URL from Stripe charge.
      */
- protected function getReceiptUrl(?string $paymentIntentId)
-{
-    if (!$paymentIntentId) {
-        return null;
+    protected function getReceiptUrl(?string $paymentIntentId): ?string
+    {
+        if (! $paymentIntentId) {
+            return null;
+        }
+
+        return rescue(function () use ($paymentIntentId) {
+            $intent = PaymentIntent::retrieve([
+                'id'     => $paymentIntentId,
+                'expand' => ['latest_charge'],
+            ]);
+
+            return $intent->latest_charge->receipt_url ?? null;
+        }, null, false);
     }
-
-    return rescue(function () use ($paymentIntentId) {
-        $intent = \Stripe\PaymentIntent::retrieve([
-            'id' => $paymentIntentId,
-            'expand' => ['latest_charge'],
-        ]);
-
-        return $intent->latest_charge->receipt_url ?? null;
-    }, null, false);
-}
 }

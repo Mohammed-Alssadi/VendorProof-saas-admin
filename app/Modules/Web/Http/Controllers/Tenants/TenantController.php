@@ -2,24 +2,19 @@
 
 namespace App\Modules\Web\Http\Controllers\Tenants;
 
-use App\Modules\Web\Http\Controllers\Controller;
 use App\Models\Tenant;
+use App\Modules\Web\Http\Controllers\Controller;
 use App\Modules\Web\Http\Requests\Tenants\StoreTenantRequest;
 use App\Modules\Web\Http\Requests\Tenants\UpdateTenantRequest;
 use App\Modules\Web\Models\Plan;
 use App\Services\Tenants\TenantService;
 use Illuminate\Http\Request;
 
-/**
- * متحكم إدارة وتحديث المنشآت والمشتركين في لوحة الإدارة.
- */
 class TenantController extends Controller
 {
     public function index(Request $request)
     {
-        $tenants = Tenant::with(['plan', 'users'])
-            ->latest()
-            ->paginate(15);
+        $tenants = Tenant::with(['plan', 'users'])->latest()->paginate(15);
 
         return view('tenants.index', compact('tenants'));
     }
@@ -48,7 +43,6 @@ class TenantController extends Controller
             'password' => $request->admin_password,
         ];
 
-        // إنشاء المنشأة والمدير بالباقة ودورة الفوترة المحددة
         $tenantService->createTenant(
             $tenantData,
             $userData,
@@ -70,7 +64,7 @@ class TenantController extends Controller
     public function edit(Tenant $tenant)
     {
         $tenant->loadMissing(['plan', 'currentSubscription.planPrice']);
-        $plans = Plan::active()->with('prices')->get();
+        $plans               = Plan::active()->with('prices')->get();
         $currentBillingCycle = $tenant->currentSubscription?->planPrice?->billing_cycle ?? 'monthly';
 
         return view('tenants.edit', compact('tenant', 'plans', 'currentBillingCycle'));
@@ -90,7 +84,7 @@ class TenantController extends Controller
     }
 
     /**
-     * تبديل الحالة التشغيلية للمنشأة (نشط / معلق).
+     * Toggle the tenant operational status between active and suspended.
      */
     public function toggleStatus(Tenant $tenant)
     {
@@ -104,9 +98,6 @@ class TenantController extends Controller
         return redirect()->back()->with('success', $message);
     }
 
-    /**
-     * أرشفة سجل المنشأة من النظام.
-     */
     public function destroy(Tenant $tenant)
     {
         $tenant->delete();

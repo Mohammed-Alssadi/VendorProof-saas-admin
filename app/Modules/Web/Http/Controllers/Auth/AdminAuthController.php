@@ -28,7 +28,6 @@ class AdminAuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $admin = Auth::user();
 
-            // فحص حالة حساب المشرف
             if (! $admin->isActive()) {
                 Auth::logout();
                 $request->session()->invalidate();

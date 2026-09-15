@@ -2,19 +2,18 @@
 
 namespace App\Modules\Api\Http\Controllers\Webhooks;
 
+use App\Modules\Api\Http\Controllers\ApiController;
 use App\Services\Payments\StripePaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * متحكم استقبال وتأكيد إشعارات بوابة الدفع Stripe (Stripe Webhook Controller).
- *
- * يستقبل الإشعارات الآمنة الصادرة من خوادم Stripe في الخلفية ويفوض معالجتها للخدمة المركزية.
- */
-class StripeWebhookController
+class StripeWebhookController extends ApiController
 {
     /**
-     * معالجة إشعار الويب هوك والتحقق من التوقيع الرقمي.
+     * Handle an incoming Stripe webhook event.
+     *
+     * Verifies the signature header before delegating to the payment service.
+     * Must remain unauthenticated and exempt from CSRF middleware.
      */
     public function handle(Request $request, StripePaymentService $stripeService): JsonResponse
     {
@@ -24,15 +23,9 @@ class StripeWebhookController
         $success = $stripeService->handleWebhook($payload, $sigHeader);
 
         if (! $success) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid webhook signature or payload.',
-            ], 400);
+            return $this->errorResponse('Invalid webhook signature or payload.', 400);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Webhook received and processed successfully.',
-        ], 200);
+        return $this->successResponse(null, 'Webhook received and processed successfully.');
     }
 }

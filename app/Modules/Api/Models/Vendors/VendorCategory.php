@@ -6,11 +6,6 @@ use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * موديل تصنيف الموردين (Vendor Category).
- *
- * يتيح لكل منشأة تصنيف مورديها حسب القطاع أو نوع النشاط مع عزل تلقائي عبر BelongsToTenant.
- */
 class VendorCategory extends Model
 {
     use HasFactory, BelongsToTenant;
@@ -28,9 +23,11 @@ class VendorCategory extends Model
         'is_active' => 'boolean',
     ];
 
-    /**
-     * تحويل بيانات التصنيف إلى مصفوفة معيارية للـ API.
-     */
+    public function vendors()
+    {
+        return $this->hasMany(Vendor::class, 'vendor_category_id');
+    }
+
     public function toApiArray(): array
     {
         return [

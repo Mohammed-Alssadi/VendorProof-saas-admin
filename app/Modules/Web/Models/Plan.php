@@ -4,7 +4,6 @@ namespace App\Modules\Web\Models;
 
 use App\Models\Payment;
 use App\Models\Tenant;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,24 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
-/**
- * Subscription plan model.
- *
- * @property int $id
- * @property string $name
- * @property string $slug
- * @property string|null $description
- * @property string $status
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property Carbon|null $deleted_at
- * @property-read Collection<int, PlanPrice> $prices
- * @property-read PlanPrice|null $monthlyPrice
- * @property-read PlanPrice|null $yearlyPrice
- * @property-read Collection<int, Feature> $features
- */
 class Plan extends Model
 {
     use HasFactory, SoftDeletes;
@@ -58,9 +40,6 @@ class Plan extends Model
         return $this->hasOne(PlanPrice::class)->where('billing_cycle', 'yearly');
     }
 
-    /**
-     * جلب السعر الفعلي النشط للباقة لدورة فوترة محددة (monthly أو yearly).
-     */
     public function activePriceFor(string $cycle): ?PlanPrice
     {
         return $this->prices()
@@ -131,17 +110,11 @@ class Plan extends Model
         return $this->monthlyPrice?->currency ?? $this->yearlyPrice?->currency ?? 'SAR';
     }
 
-    /**
-     * رمز العملة المالي للباقة استناداً لأسعار الفوترة المعتمدة.
-     */
     public function getCurrencySymbolAttribute(): string
     {
         return PlanPrice::getCurrencySymbol($this->currency);
     }
 
-    /**
-     * علاقة مباشرة بالمنشآت المشتركة في هذه الباقة.
-     */
     public function tenants(): HasMany
     {
         return $this->hasMany(Tenant::class, 'plan_id');
@@ -152,34 +125,22 @@ class Plan extends Model
         return $this->hasMany(Payment::class);
     }
 
-    /**
-     * عدد المنشآت المشتركة في هذه الباقة مباشرة.
-     */
     public function getTenantsCountAttribute(): int
     {
         return (int) ($this->attributes['tenants_count'] ?? $this->tenants()->count());
     }
 
-    /**
-     * نطاق استعلام الباقات النشطة فقط.
-     */
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
     }
 
-    /**
-     * جلب الباقة المجانية الافتراضية للنظام بنظافة.
-     */
     public static function defaultFree(): ?self
     {
         return static::where('slug', 'free')->first()
             ?? static::where('status', 'active')->first();
     }
 
-    /**
-     * فحص هل هذه الباقة مجانية دائمة (Freemium).
-     */
     public function isFree(): bool
     {
         if ($this->slug === 'free') {
@@ -195,33 +156,22 @@ class Plan extends Model
         return $prices->every(fn ($p) => (float) $p->price === 0.0);
     }
 
-    /**
-     * فحص هل هذه الباقة مدفوعة ومعتمدة برسم مالي.
-     */
     public function isPaid(): bool
     {
         return ! $this->isFree();
     }
 
-    /**
-     * نطاق استعلام الباقات المجانية فقط.
-     */
     public function scopeFree($query)
     {
         return $query->where('slug', 'free');
     }
 
-    /**
-     * نطاق استعلام الباقات المدفوعة فقط.
-     */
     public function scopePaid($query)
     {
         return $query->where('slug', '!=', 'free');
     }
 
     /**
-     * جلب مصفوفة الحدود التشغيلية المسموحة للباقة بصيغة رقمية بسيطة (Key => Limit).
-     *
      * @return array<string, int>
      */
     public function dynamicLimits(): array
@@ -251,8 +201,6 @@ class Plan extends Model
     }
 
     /**
-     * جلب قائمة نصية بمفاتيح الميزات التشغيلية المتاحة والمفعلة للباقة.
-     *
      * @return array<string>
      */
     public function dynamicFeatures(): array
@@ -266,8 +214,6 @@ class Plan extends Model
     }
 
     /**
-     * توليد قائمة نصية جاهزة للعرض كعناصر Checkmark في بطاقات الأسعار.
-     *
      * @return array<string>
      */
     public function checklist(): array
@@ -293,8 +239,6 @@ class Plan extends Model
     }
 
     /**
-     * تحويل الباقة إلى مصفوفة معيارية موحدة للواجهات البرمجية (API Serialization).
-     *
      * @return array<string, mixed>
      */
     public function toApiArray(): array

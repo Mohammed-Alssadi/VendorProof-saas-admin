@@ -4,9 +4,6 @@ namespace App\Modules\Api\Http\Requests\Subscription;
 
 use App\Modules\Api\Http\Requests\ApiRequest;
 
-/**
- * طلب التحقق من صحة بيانات إنشاء جلسة دفع الترقية (Stripe Checkout Request).
- */
 class CheckoutSubscriptionRequest extends ApiRequest
 {
     public function rules(): array

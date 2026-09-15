@@ -6,11 +6,6 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-/**
- * الكلاس الأساسي التجريدي لكافة طلبات التحقق للواجهات البرمجية (API Form Requests).
- *
- * يوفر معالجة معيارية موحدة لأخطاء التحقق وإرجاع استجابة JSON موحدة بهيكل الخطأ المعتمد.
- */
 abstract class ApiRequest extends FormRequest
 {
     public function authorize(): bool
@@ -19,7 +14,7 @@ abstract class ApiRequest extends FormRequest
     }
 
     /**
-     * إرجاع أخطاء التحقق بصيغة JSON نظيفة وواضحة للواجهات الخارجية.
+     * Return validation errors as a standardized JSON envelope instead of a redirect.
      */
     protected function failedValidation(Validator $validator)
     {

@@ -10,12 +10,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * موديل المدفوعات والفواتير للمنظومة (Payment & Invoice Ledger Model).
- *
- * يمثل السجل المالي التاريخي الموثق لكل معاملة سداد تمت في المنصة.
- 
- */
 class Payment extends Model
 {
     use HasFactory, HasUuids;
@@ -42,10 +36,6 @@ class Payment extends Model
         'paid_at' => 'datetime',
     ];
 
-    // ==========================================
-    // العلاقات (Relationships)
-    // ==========================================
-
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
@@ -60,10 +50,6 @@ class Payment extends Model
     {
         return $this->belongsTo(PlanPrice::class);
     }
-
-    // ==========================================
-    // الدوال المساعدة (Helper Methods)
-    // ==========================================
 
     public function isPaid(): bool
     {
@@ -85,9 +71,6 @@ class Payment extends Model
         return $this->status === 'refunded';
     }
 
-    /**
-     * إرجاع المبلغ المالي منسقاً مع رمز العملة (مثال: 499.00 ر.س).
-     */
     public function formattedAmount(): string
     {
         $symbol = PlanPrice::getCurrencySymbol($this->currency);
@@ -95,9 +78,6 @@ class Payment extends Model
         return number_format((float) $this->amount, 2) . ' ' . $symbol;
     }
 
-    /**
-     * المسمى العربي الرسمي لحالة السداد.
-     */
     public function statusLabelArabic(): string
     {
         return match ($this->status) {
@@ -109,17 +89,10 @@ class Payment extends Model
         };
     }
 
-    /**
-     * اسم دورة الفوترة بالعربية.
-     */
     public function billingCycleArabic(): string
     {
         return $this->billing_cycle === 'yearly' ? 'سنوي' : 'شهري';
     }
-
-    // ==========================================
-    // نطاقات الاستعلام (Query Scopes)
-    // ==========================================
 
     public function scopePaid(Builder $query): Builder
     {

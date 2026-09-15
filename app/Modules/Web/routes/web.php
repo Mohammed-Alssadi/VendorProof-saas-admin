@@ -10,12 +10,11 @@ use App\Modules\Web\Http\Controllers\Subscriptions\SubscriptionController;
 use App\Modules\Web\Http\Controllers\Tenants\TenantController;
 use Illuminate\Support\Facades\Route;
 
-// عند فتح الموقع مباشرة يتوجه لصفحة تسجيل الدخول
 Route::get('/', function () {
     return redirect('/login');
 });
 
-// مسارات الضيوف (تسجيل الدخول والإنشاء) مع حماية التخمين
+// Guest routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AdminAuthController::class, 'login'])->middleware('throttle:5,1');
@@ -23,17 +22,17 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AdminAuthController::class, 'register']);
 });
 
-// مسارات لوحة التحكم المحمية
+// Authenticated Admin Dashboard routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
-    // إعدادات الحساب الشخصي والأمان للسوبر أدمن
+    // Profile & Security
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
-    // إدارة المشتركين والمنشآت
+    // Tenants management
     Route::get('/tenants', [TenantController::class, 'index'])->name('tenants.index');
     Route::get('/tenants/create', [TenantController::class, 'create'])->name('tenants.create');
     Route::post('/tenants', [TenantController::class, 'store'])->name('tenants.store');
@@ -43,7 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/tenants/{tenant}', [TenantController::class, 'destroy'])->name('tenants.destroy');
     Route::post('/tenants/{tenant}/toggle-status', [TenantController::class, 'toggleStatus'])->name('tenants.toggle-status');
 
-    // الخطط والأسعار ومصفوفة الميزات
+    // Plans & Pricing
     Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
     Route::get('/plans/create', [PlanController::class, 'create'])->name('plans.create');
     Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
@@ -55,7 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/plans/{plan}', [PlanController::class, 'destroy'])->name('plans.destroy');
     Route::get('/plans-matrix', [PlanController::class, 'matrix'])->name('plans.matrix');
 
-    // الميزات والحدود التشغيلية
+    // Features & Limits
     Route::get('/features', [FeatureController::class, 'index'])->name('features.index');
     Route::get('/features/create', [FeatureController::class, 'create'])->name('features.create');
     Route::post('/features', [FeatureController::class, 'store'])->name('features.store');
@@ -63,10 +62,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/features/{feature}', [FeatureController::class, 'update'])->name('features.update');
     Route::delete('/features/{feature}', [FeatureController::class, 'destroy'])->name('features.destroy');
 
-    // المشتركون وسجل الباقات
+    // Subscriptions
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
 
-    // المدفوعات والفواتير
+    // Payments & Invoices
     Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
 });

@@ -7,6 +7,7 @@ use App\Modules\Api\Http\Controllers\Plans\ApiPlanController;
 use App\Modules\Api\Http\Controllers\Profile\ApiProfileController;
 use App\Modules\Api\Http\Controllers\Subscription\ApiSubscriptionController;
 use App\Modules\Api\Http\Controllers\Vendors\ApiVendorCategoryController;
+use App\Modules\Api\Http\Controllers\Vendors\ApiVendorController;
 use App\Modules\Api\Http\Controllers\Webhooks\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,39 +25,35 @@ Route::get('/ping', function () {
 });
 
 Route::prefix('v1')->group(function () {
-    // 1. مسارات الضيوف العامة (صفحة الهبوط والتسعير)
+    // Public routes
     Route::get('/plans', [ApiPlanController::class, 'index']);
 
-    // 2. مسار إشعارات الويب هوك من سترايب (متاح للعامة ومحمي بالتوقيع الرقمي)
+    // Stripe webhook — public but signature-protected
     Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
-    // 3. مسارات المصادقة مع حماية التخمين
+    // Guest auth — rate-limited
     Route::middleware('throttle:10,1')->group(function () {
         Route::post('/register', [ApiTenantRegistrationController::class, 'register']);
         Route::post('/login', [ApiAuthController::class, 'login']);
     });
 
-    // 4. مسارات العميل المحمية بواسطة التوكن الرقمي (Sanctum Token)
+    // Sanctum-protected routes
     Route::middleware('auth:sanctum')->group(function () {
-        // فحص الجلسة والاشتراك
         Route::get('/me', [ApiAuthController::class, 'me']);
         Route::post('/logout', [ApiAuthController::class, 'logout']);
 
-        // بروفايل المستخدم الشخصي
         Route::get('/profile', [ApiProfileController::class, 'show']);
         Route::put('/profile', [ApiProfileController::class, 'update']);
 
-        // بروفايل المنشأة / الشركة
         Route::get('/company', [ApiCompanyController::class, 'show']);
         Route::put('/company', [ApiCompanyController::class, 'update']);
         Route::delete('/company', [ApiCompanyController::class, 'destroy']);
 
-        // إدارة واشتراكات المنشأة (جلسة الدفع والإلغاء)
         Route::get('/subscription', [ApiSubscriptionController::class, 'show']);
         Route::post('/subscription/checkout', [ApiSubscriptionController::class, 'checkout']);
         Route::post('/subscription/cancel', [ApiSubscriptionController::class, 'cancel']);
 
-        // تصنيفات الموردين للمنشأة
         Route::apiResource('vendor-categories', ApiVendorCategoryController::class);
+        Route::apiResource('vendors', ApiVendorController::class);
     });
 });

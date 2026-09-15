@@ -104,3 +104,100 @@ DELETE          api/v1/vendor-categories/{vendor_category}
 - اجتياز اختبار `FormRequestValidationTest` المخصص بنجاح 100%.
 - اجتياز كامل حزمة اختبارات المنظومة: **100 اختبار ناجح (100 passed, 547 assertions)**.
 
+---
+
+## [الخطوة رقم: 3] - تأسيس محرك إدارة الموردين في الـ API (Vendors Engine)
+
+### 1. السبب والهدف المعماري:
+- استكمال الجزء المحوري في المنصة وهو إدارة الموردين للمنشآت (Tenants) عبر واجهات RESTful API خفيفة وبسيطة.
+- ضمان أعلى معايير النظافة البرمجية (Clean Controller & Standard Form Requests) والعزل التلقائي المتعدد عبر `BelongsToTenant`.
+- توفير عقد استجابة JSON نقي ومباشر بدون تعقيدات الترقيم (Pagination) أو الحصص (Quota) لتسهيل استهلاك الفرونت إند المنفصل.
+
+---
+
+### 2. الملفات المتأثرة والمضافة:
+1. `app/Modules/Api/Http/Requests/Vendors/StoreVendorRequest.php` (طلب إضافة مورد جديد مع التحقق الصارم)
+2. `app/Modules/Api/Http/Requests/Vendors/UpdateVendorRequest.php` (طلب تعديل بيانات المورد مع استثناء المورد الحالي من فحص فرادة البريد)
+3. `app/Modules/Api/Http/Controllers/Vendors/ApiVendorController.php` (متحكم الموردين المعياري)
+4. `app/Modules/Api/routes/api.php` (تسجيل مسارات apiResource للموردين)
+5. `tests/Feature/VendorApiTest.php` (اختبارات آلية شاملة تغطي الصلاحيات، التحقق، العزل، والعمليات)
+
+---
+
+### 3. التفاصيل البرمجية المعتمدة:
+
+#### أ. طلبات التحقق (`StoreVendorRequest` و `UpdateVendorRequest`):
+- فرض الحد الأدنى والنمط اللغوي على حقول الأسماء لمنع الأرقام المجردة: `min:2` و `regex:/[\pL]/u` على `name` و `contact_name`.
+- قيد فرادة البريد الإلكتروني للمنشأة الواحدة فقط:
+  `Rule::unique('vendors', 'email')->where('tenant_id', $this->user()->tenant_id)`.
+- فحص صحة رقم الهاتف بالنمط الدولي والمحلي: `regex:/^(\+?[0-9\s\-]{7,20})$/`.
+- التحقق من تبعية التصنيف `vendor_category_id` لنفس المنشأة عبر:
+  `Rule::exists('vendor_categories', 'id')->where('tenant_id', $this->user()->tenant_id)`.
+- حوكمة حالات المورد بحسب القيم المصرح بها: `in:active,pending,suspended`.
+
+#### ب. متحكم الموردين (`ApiVendorController`):
+- الوراثة المباشرة من `ApiController` والاعتماد على `$this->successResponse(...)`.
+- استخدام Route Model Binding القياسي في لارافيل لكافة العمليات الفردية (`show`, `update`, `destroy`).
+- استرجاع قائمة الموردين كمصفوفة نقية ومباشرة عبر `$vendor->toApiArray()`.
+- تعبئة `tenant_id` تلقائياً عبر السمة `BelongsToTenant`.
+
+#### ج. المسارات المعتمدة:
+```text
+GET|HEAD        api/v1/vendors
+POST            api/v1/vendors
+GET|HEAD        api/v1/vendors/{vendor}
+PUT|PATCH       api/v1/vendors/{vendor}
+DELETE          api/v1/vendors/{vendor}
+```
+
+---
+
+### 4. النتيجة والتحقق (Verification):
+- كتابة وتشغيل اختبارات `VendorApiTest` الآلية الشاملة:
+  1. حظر غير الموثقين (401).
+  2. إنشاء المورد واسترجاع بياناته بصيغة معيارية (201).
+  3. التحقق من رفض الأرقام المجردة في الأسماء وتنسيق البريد والهاتف (422).
+  4. منع تكرار نفس البريد للمنشأة الواحدة (422).
+  5. السماح لمنشآت مختلفة بإضافة موردين بنفس البريد بشكل مستقل تماماً.
+  6. العزل التلقائي (عدم ظهور موردي منشأة لمنشأة أخرى).
+  7. العرض الفردي للمورد وتفاصيله.
+  8. الحماية الصارمة من الوصول أو التعديل أو الحذف لمورد تابع لمنشأة أخرى (404).
+  9. التعديل والحذف الآمن للمورد.
+- نجاح كافة اختبارات الموردين: **10 passed (28 assertions)**.
+- نجاح كامل طقم اختبارات المنظومة: **112 passed (579 assertions)**.
+
+---
+
+## [الخطوة رقم: 4] - التنظيف والتوثيق المعماري الشامل لموديول الويب وملفات المنصة (Web Module & App Architecture Cleanup)
+
+### 1. السبب والهدف المعماري:
+- استئصال مظاهر التلوث البرمجي والتعليقات العشوائية (AI Slop) والترقيمات المصطنعة (`// 1.`, `// 2.`) والفواصل التقليدية القديمة (`// ==== العلاقات ====`).
+- توحيد لغة وأسلوب التوثيق البرمجي (Docblocks & Code Comments) باللغة الإنجليزية المعيارية والموجزة للمطورين، والتخلص من الشروح الزائدة للأكواد البديهية.
+- إصلاح المسافات البادئة والتنسيق الداخلي في دوال الخدمات المالية (`StripePaymentService`).
+- الحفاظ التام والصلب على استقرار النظام وكامل الوظائف والاختبارات دون أدنى كسر.
+
+---
+
+### 2. الملفات المحدثة:
+1. `app/Modules/Web/Http/Controllers/DashboardController.php` (حذف Docblock والتعليقات الرقمية)
+2. `app/Modules/Web/Http/Controllers/Auth/AdminAuthController.php` (حذف تعليق التحقق البديهي)
+3. `app/Modules/Web/Http/Controllers/Plans/PlanController.php` (تحويل الـ Docblocks إلى الإنجليزية الموجزة)
+4. `app/Modules/Web/Http/Controllers/Tenants/TenantController.php` (حذف الشروح الزائدة والتعليقات البديهية)
+5. `app/Modules/Web/Http/Controllers/Payments/PaymentController.php` (تنظيف كامل الـ Docblocks الزائدة)
+6. `app/Modules/Web/Http/Controllers/Subscriptions/SubscriptionController.php` (تنظيف الـ Docblocks الزائدة)
+7. `app/Modules/Web/Models/Plan.php` (حذف التعليقات العربية على الدوال الواضحة وتوحيد وثائق الأنواع)
+8. `app/Modules/Web/Models/PlanPrice.php` (تنظيف التوثيق المعياري وحذف حشو الـ @property الزائد)
+9. `app/Modules/Web/Models/Admin.php` (تنظيف حشو الـ @property والتعليق العربي)
+10. `app/Models/Payment.php` (استئصال فواصل الأقسام القديمة والـ Docblocks العربية)
+11. `app/Modules/Web/Services/Plans/PlanService.php` (حذف الترقيمات والـ Docblocks العربية واعتماد توثيق إنجليزي معياري)
+12. `app/Services/Payments/StripePaymentService.php` (حذف التعليقات الرقمية العربية، تصحيح مسافات `getReceiptUrl()`)
+13. `app/Modules/Web/routes/web.php` (توحيد تعليقات الأقسام بالإنجليزية المعيارية)
+
+---
+
+### 3. النتيجة والتحقق (Verification):
+- تشغيل اختبارات النظام الشاملة بنجاح 100%:
+  **112 passed (579 assertions)**.
+
+
+

@@ -8,17 +8,8 @@ use App\Modules\Api\Http\Requests\Company\UpdateCompanyProfileRequest;
 use App\Modules\Api\Services\Company\CompanyService;
 use Illuminate\Http\Request;
 
-/**
- * Manage subscriber company identity, profile, and lifecycle.
- */
 class ApiCompanyController extends ApiController
 {
-    /**
-     * Get subscriber company profile.
-     *
-     * Returns company identity attributes, commercial registration, contact details,
-     * and current subscription plan entitlements.
-     */
     public function show(Request $request)
     {
         $tenant = $request->user()->tenant;
@@ -30,12 +21,6 @@ class ApiCompanyController extends ApiController
         return $this->successResponse($tenant->toApiArray());
     }
 
-    /**
-     * Update company profile and contact details.
-     *
-     * Updates official company information such as commercial name, registration number,
-     * and business contact information.
-     */
     public function update(UpdateCompanyProfileRequest $request)
     {
         $tenant = $request->user()->tenant;
@@ -55,10 +40,9 @@ class ApiCompanyController extends ApiController
     }
 
     /**
-     * Terminate and close subscriber company account.
+     * Terminate the company account after credentials verification.
      *
-     * Soft-deletes the company profile, cancels active subscriptions, and revokes
-     * all access tokens for every associated team member after credentials verification.
+     * Cancels subscriptions, revokes all tokens, and soft-deletes the tenant.
      */
     public function destroy(CloseCompanyAccountRequest $request, CompanyService $companyService)
     {
