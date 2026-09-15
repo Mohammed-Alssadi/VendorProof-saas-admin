@@ -22,10 +22,11 @@ class UpdatePlanRequest extends FormRequest
 
         return [
             // 1. البيانات الأساسية للباقة
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'min:2', 'max:255'],
             'slug' => [
                 'required',
                 'string',
+                'min:3',
                 'max:100',
                 'regex:/^[a-z0-9-]+$/',
                 Rule::unique('plans', 'slug')->ignore($planId),
@@ -47,8 +48,10 @@ class UpdatePlanRequest extends FormRequest
     {
         return [
             'name.required' => 'يرجى إدخال اسم باقة الاشتراك بالعربية.',
+            'name.min' => 'اسم الباقة يجب ألا يقل عن حرفين.',
             'name.string' => 'اسم الباقة يجب أن يكون نصاً صالحاً.',
             'name.max' => 'اسم الباقة يجب ألا يتجاوز 255 حرفاً.',
+            'slug.min' => 'الاسم التعريفي للباقة يجب ألا يقل عن 3 أحرف.',
 
             'slug.required' => 'الاسم التعريفي للباقة بالإنجليزية مطلوب.',
             'slug.string' => 'الاسم التعريفي للباقة غير صالح.',

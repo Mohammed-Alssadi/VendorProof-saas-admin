@@ -18,20 +18,21 @@ class StoreTenantRequest extends FormRequest
     {
         return [
             // 1. بيانات المنشأة والسجل التجاري
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'min:2', 'max:255', 'regex:/[\pL]/u', 'not_regex:/^[0-9]+$/'],
             'slug' => [
                 'required',
                 'string',
+                'min:3',
                 'max:100',
                 'regex:/^[a-z0-9-]+$/',
                 'unique:tenants,slug',
             ],
-            'company_cr' => ['required', 'string', 'max:20', 'unique:tenants,company_cr'],
+            'company_cr' => ['required', 'numeric', 'digits_between:10,20', 'unique:tenants,company_cr'],
             'email' => ['required', 'email', 'max:255', 'unique:tenants,email'],
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => ['required', 'string', 'regex:/^(\+?[0-9\s\-]{7,20})$/'],
 
             // 2. بيانات حساب مدير المنشأة الأولي (حساب الدخول)
-            'admin_name' => ['required', 'string', 'max:255'],
+            'admin_name' => ['required', 'string', 'min:2', 'max:255', 'regex:/[\pL]/u', 'not_regex:/^[0-9]+$/'],
             'admin_email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'admin_password' => ['required', 'string', 'min:8'],
 
@@ -46,18 +47,21 @@ class StoreTenantRequest extends FormRequest
         return [
             // بيانات المنشأة
             'name.required' => 'يرجى إدخال اسم المنشأة أو الشركة الرسمي.',
-            'name.string' => 'اسم المنشأة يجب أن يكون نصاً صالحاً.',
+            'name.min' => 'اسم المنشأة يجب ألا يقل عن حرفين.',
+            'name.regex' => 'اسم المنشأة يجب أن يحتوي على أحرف صالحة.',
+            'name.not_regex' => 'اسم المنشأة لا يمكن أن يتكون من أرقام فقط.',
             'name.max' => 'اسم المنشأة يجب ألا يتجاوز 255 حرفاً.',
 
             'slug.required' => 'رابط المنشأة مطلوب.',
+            'slug.min' => 'رابط المنشأة يجب ألا يقل عن 3 أحرف.',
             'slug.string' => 'رابط المنشأة غير صالح.',
             'slug.max' => 'رابط المنشأة يجب ألا يتجاوز 100 حرف.',
             'slug.regex' => 'الرابط يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطة (-) فقط (مثال: sahab-tech).',
             'slug.unique' => 'هذا الرابط مستخدم مسبقاً، يرجى اختيار رابط آخر.',
 
             'company_cr.required' => 'يرجى إدخال رقم السجل التجاري المعتمد.',
-            'company_cr.string' => 'رقم السجل التجاري يجب أن يكون نصاً أو رقماً صالحاً.',
-            'company_cr.max' => 'رقم السجل التجاري يجب ألا يتجاوز 20 حرفاً.',
+            'company_cr.numeric' => 'رقم السجل التجاري يجب أن يحتوي على أرقام فقط.',
+            'company_cr.digits_between' => 'رقم السجل التجاري يجب أن يتكون من 10 إلى 20 رقماً.',
             'company_cr.unique' => 'رقم السجل التجاري مسجل مسبقاً لمنشأة أخرى.',
 
             'email.required' => 'يرجى إدخال البريد الإلكتروني الرسمي للمنشأة.',
@@ -65,12 +69,13 @@ class StoreTenantRequest extends FormRequest
             'email.unique' => 'البريد الإلكتروني للمنشأة مسجل مسبقاً.',
 
             'phone.required' => 'يرجى إدخال رقم الهاتف المعتمد للمنشأة.',
-            'phone.string' => 'رقم الهاتف يجب أن يكون نصاً صالحاً.',
-            'phone.max' => 'رقم الهاتف يجب ألا يتجاوز 20 حرفاً.',
+            'phone.regex' => 'رقم الهاتف غير صالح، يجب أن يتكون من أرقام صحيحة (بين 7 و 20 رقماً).',
 
             // بيانات المدير
             'admin_name.required' => 'يرجى إدخال الاسم الكامل لمدير المنشأة.',
-            'admin_name.string' => 'اسم المدير يجب أن يكون نصاً صالحاً.',
+            'admin_name.min' => 'اسم المدير يجب ألا يقل عن حرفين.',
+            'admin_name.regex' => 'اسم المدير يجب أن يحتوي على أحرف صالحة.',
+            'admin_name.not_regex' => 'اسم المدير لا يمكن أن يتكون من أرقام فقط.',
             'admin_name.max' => 'اسم المدير يجب ألا يتجاوز 255 حرفاً.',
 
             'admin_email.required' => 'يرجى إدخال البريد الإلكتروني لتسجيل دخول مدير المنشأة.',

@@ -19,7 +19,7 @@ class UpdatePlanFeaturesRequest extends FormRequest
         return [
             'features' => ['nullable', 'array'],
             'features.*' => ['nullable', 'array'],
-            'features.*.value' => ['nullable'],
+            'features.*.value' => ['nullable', 'numeric', 'min:-1'],
         ];
     }
 
@@ -27,6 +27,8 @@ class UpdatePlanFeaturesRequest extends FormRequest
     {
         return [
             'features.array' => 'بيانات الميزات والحدود يجب أن تكون مصفوفة صالحة.',
+            'features.*.value.numeric' => 'قيمة الميزة أو الحد التشغيلي يجب أن تكون قيمة رقمية صالحة.',
+            'features.*.value.min' => 'قيمة الحد التشغيلي لا يمكن أن تقل عن -1 (لغير المحدود).',
         ];
     }
 }

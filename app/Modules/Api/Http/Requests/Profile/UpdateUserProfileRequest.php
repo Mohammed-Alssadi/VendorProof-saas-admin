@@ -16,7 +16,7 @@ class UpdateUserProfileRequest extends ApiRequest
         $userId = $this->user()?->id;
 
         return [
-            'name'             => ['required', 'string', 'max:255'],
+            'name'             => ['required', 'string', 'min:2', 'max:255', 'regex:/[\pL]/u', 'not_regex:/^[0-9]+$/'],
             'email'            => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'current_password' => ['nullable', 'required_with:password', 'string'],
             'password'         => ['nullable', 'string', 'min:8', 'confirmed'],
@@ -27,6 +27,9 @@ class UpdateUserProfileRequest extends ApiRequest
     {
         return [
             'name.required'                    => 'الاسم مطلوب.',
+            'name.min'                         => 'الاسم يجب ألا يقل عن حرفين.',
+            'name.regex'                       => 'الاسم يجب أن يحتوي على أحرف صالحة.',
+            'name.not_regex'                   => 'الاسم لا يمكن أن يتكون من أرقام فقط.',
             'name.max'                         => 'الاسم يجب ألا يتجاوز 255 حرفاً.',
             'email.required'                   => 'البريد الإلكتروني مطلوب.',
             'email.email'                      => 'صيغة البريد الإلكتروني غير صالحة.',

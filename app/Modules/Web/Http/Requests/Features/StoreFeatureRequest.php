@@ -17,10 +17,11 @@ class StoreFeatureRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'min:2', 'max:255'],
             'key' => [
                 'required',
                 'string',
+                'min:2',
                 'max:100',
                 'regex:/^[a-z0-9_]+$/',
                 'unique:features,key',
@@ -33,9 +34,11 @@ class StoreFeatureRequest extends FormRequest
     {
         return [
             'name.required' => 'يرجى إدخال اسم الميزة بالعربية.',
+            'name.min' => 'اسم الميزة يجب ألا يقل عن حرفين.',
             'name.string' => 'اسم الميزة يجب أن يكون نصاً صالحاً.',
             'name.max' => 'اسم الميزة لا يجب أن يتجاوز 255 حرفاً.',
             'key.required' => 'اسم الميزة بالإنجليزية مطلوب.',
+            'key.min' => 'اسم الميزة بالإنجليزية يجب ألا يقل عن حرفين.',
             'key.string' => 'اسم الميزة بالإنجليزية غير صالح.',
             'key.max' => 'اسم الميزة بالإنجليزية يجب ألا يتجاوز 100 حرف.',
             'key.regex' => 'اسم الميزة يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطة سفلية (_) فقط (مثال: max_vendors).',
