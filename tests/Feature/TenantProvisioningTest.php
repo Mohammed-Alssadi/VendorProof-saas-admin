@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Tenant;
 use App\Modules\Api\Models\User;
+use App\Modules\Web\Models\Admin;
 use App\Modules\Web\Models\Feature;
 use App\Modules\Web\Models\Plan;
 use App\Services\Payments\StripePaymentService;
@@ -98,14 +99,14 @@ class TenantProvisioningTest extends TestCase
     public function test_api_register_creates_tenant_and_returns_token(): void
     {
         $response = $this->postJson('/api/v1/register', [
-            'company_name'          => 'شركة سحاب الرقمية',
-            'slug'                  => 'sahab-digital-test',
-            'company_cr'            => '1010776655',
-            'company_email'         => 'contact@sahab-digital-test.sa',
-            'phone'                 => '0112233445',
-            'name'                  => 'سعود العتيبي',
-            'email'                 => 'saud@sahab-digital-test.sa',
-            'password'              => 'password123',
+            'company_name' => 'شركة سحاب الرقمية',
+            'slug' => 'sahab-digital-test',
+            'company_cr' => '1010776655',
+            'company_email' => 'contact@sahab-digital-test.sa',
+            'phone' => '0112233445',
+            'name' => 'سعود العتيبي',
+            'email' => 'saud@sahab-digital-test.sa',
+            'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
 
@@ -150,14 +151,14 @@ class TenantProvisioningTest extends TestCase
     {
         // 1. تسجيل أولاً
         $regResponse = $this->postJson('/api/v1/register', [
-            'company_name'          => 'شركة تجربة الدخول',
-            'slug'                  => 'login-test-co',
-            'company_cr'            => '1010998822',
-            'company_email'         => 'info@login-test-co.sa',
-            'phone'                 => '0119988776',
-            'name'                  => 'محمد الدوسري',
-            'email'                 => 'm@login-test-co.sa',
-            'password'              => 'securepass123',
+            'company_name' => 'شركة تجربة الدخول',
+            'slug' => 'login-test-co',
+            'company_cr' => '1010998822',
+            'company_email' => 'info@login-test-co.sa',
+            'phone' => '0119988776',
+            'name' => 'محمد الدوسري',
+            'email' => 'm@login-test-co.sa',
+            'password' => 'securepass123',
             'password_confirmation' => 'securepass123',
         ]);
 
@@ -165,7 +166,7 @@ class TenantProvisioningTest extends TestCase
 
         // 2. محاولة الدخول
         $loginResponse = $this->postJson('/api/v1/login', [
-            'email'    => 'm@login-test-co.sa',
+            'email' => 'm@login-test-co.sa',
             'password' => 'securepass123',
         ]);
 
@@ -213,10 +214,10 @@ class TenantProvisioningTest extends TestCase
         // 5. فحص تحديث بروفايل المستخدم مع تغيير كلمة المرور PUT /profile
         $profileUpdate = $this->withHeader('Authorization', 'Bearer '.$token)
             ->putJson('/api/v1/profile', [
-                'name'                  => 'محمد الدوسري المحدث',
-                'email'                 => 'm.updated@login-test-co.sa',
-                'current_password'      => 'securepass123',
-                'password'              => 'newsecurepass456',
+                'name' => 'محمد الدوسري المحدث',
+                'email' => 'm.updated@login-test-co.sa',
+                'current_password' => 'securepass123',
+                'password' => 'newsecurepass456',
                 'password_confirmation' => 'newsecurepass456',
             ]);
 
@@ -237,10 +238,10 @@ class TenantProvisioningTest extends TestCase
         // 7. فحص تحديث بروفايل المنشأة PUT /company
         $companyUpdate = $this->withHeader('Authorization', 'Bearer '.$token)
             ->putJson('/api/v1/company', [
-                'name'       => 'شركة تجربة الدخول المتطورة',
+                'name' => 'شركة تجربة الدخول المتطورة',
                 'company_cr' => '1010998822',
-                'email'      => 'official@login-test-co.sa',
-                'phone'      => '0115544332',
+                'email' => 'official@login-test-co.sa',
+                'phone' => '0115544332',
             ]);
 
         $companyUpdate->assertStatus(200);
@@ -376,13 +377,13 @@ class TenantProvisioningTest extends TestCase
     {
         // 1. تسجيل منشأة جديدة
         $regResponse = $this->postJson('/api/v1/register', [
-            'company_name'          => 'شركة تجربة الإغلاق',
-            'slug'                  => 'close-test-co',
-            'company_cr'            => '1010332211',
-            'company_email'         => 'close@test-co.sa',
-            'name'                  => 'المالك المودع',
-            'email'                 => 'owner@close-test-co.sa',
-            'password'              => 'closepass123',
+            'company_name' => 'شركة تجربة الإغلاق',
+            'slug' => 'close-test-co',
+            'company_cr' => '1010332211',
+            'company_email' => 'close@test-co.sa',
+            'name' => 'المالك المودع',
+            'email' => 'owner@close-test-co.sa',
+            'password' => 'closepass123',
             'password_confirmation' => 'closepass123',
         ]);
 
@@ -393,7 +394,7 @@ class TenantProvisioningTest extends TestCase
         // 2. محاولة الحذف بكلمة مرور خاطئة -> 422
         $wrongPass = $this->withHeader('Authorization', 'Bearer '.$token)
             ->deleteJson('/api/v1/company', [
-                'current_password'  => 'wrong_password',
+                'current_password' => 'wrong_password',
                 'confirmation_name' => 'شركة تجربة الإغلاق',
             ]);
         $wrongPass->assertStatus(422);
@@ -401,7 +402,7 @@ class TenantProvisioningTest extends TestCase
         // 3. محاولة الحذف باسم تأكيد غير مطابق -> 422
         $wrongName = $this->withHeader('Authorization', 'Bearer '.$token)
             ->deleteJson('/api/v1/company', [
-                'current_password'  => 'closepass123',
+                'current_password' => 'closepass123',
                 'confirmation_name' => 'اسم شركة مختلف تماماً',
             ]);
         $wrongName->assertStatus(422);
@@ -409,7 +410,7 @@ class TenantProvisioningTest extends TestCase
         // 4. الحذف الناجح بعد استيفاء الأمان
         $successDelete = $this->withHeader('Authorization', 'Bearer '.$token)
             ->deleteJson('/api/v1/company', [
-                'current_password'  => 'closepass123',
+                'current_password' => 'closepass123',
                 'confirmation_name' => 'شركة تجربة الإغلاق',
             ]);
 
@@ -436,36 +437,36 @@ class TenantProvisioningTest extends TestCase
     {
         // 1. إنشاء باقة مدفوعة للاختبار
         $proPlan = Plan::create([
-            'name'        => 'الباقة الاحترافية',
-            'slug'        => 'pro',
+            'name' => 'الباقة الاحترافية',
+            'slug' => 'pro',
             'description' => 'باقة متقدمة للاختبارات',
-            'status'      => 'active',
+            'status' => 'active',
         ]);
 
         $proPlan->prices()->create([
-            'price'         => 299.00,
-            'currency'      => 'SAR',
+            'price' => 299.00,
+            'currency' => 'SAR',
             'billing_cycle' => 'monthly',
-            'status'        => 'active',
+            'status' => 'active',
         ]);
 
         $proYearlyPrice = $proPlan->prices()->create([
-            'price'         => 2990.00,
-            'currency'      => 'SAR',
+            'price' => 2990.00,
+            'currency' => 'SAR',
             'billing_cycle' => 'yearly',
-            'status'        => 'active',
+            'status' => 'active',
         ]);
 
         // 2. تسجيل منشأة جديدة (تكون على الباقة المجانية تلقائياً)
         $regResponse = $this->postJson('/api/v1/register', [
-            'company_name'          => 'شركة تجربة الاشتراكات',
-            'slug'                  => 'sub-test-co',
-            'company_cr'            => '1010332211',
-            'company_email'         => 'sub@test-co.sa',
-            'phone'                 => '0112223334',
-            'name'                  => 'مدير الاشتراكات',
-            'email'                 => 'manager@sub-test-co.sa',
-            'password'              => 'subpass123',
+            'company_name' => 'شركة تجربة الاشتراكات',
+            'slug' => 'sub-test-co',
+            'company_cr' => '1010332211',
+            'company_email' => 'sub@test-co.sa',
+            'phone' => '0112223334',
+            'name' => 'مدير الاشتراكات',
+            'email' => 'manager@sub-test-co.sa',
+            'password' => 'subpass123',
             'password_confirmation' => 'subpass123',
         ]);
 
@@ -495,7 +496,7 @@ class TenantProvisioningTest extends TestCase
         $freePlanId = $regResponse->json('data.tenant.plan.id');
         $redundantCheckout = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson('/api/v1/subscription/checkout', [
-                'plan_id'       => $freePlanId,
+                'plan_id' => $freePlanId,
                 'billing_cycle' => 'monthly',
             ]);
 
@@ -509,7 +510,7 @@ class TenantProvisioningTest extends TestCase
 
         $checkoutResponse = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson('/api/v1/subscription/checkout', [
-                'plan_id'       => $proPlan->id,
+                'plan_id' => $proPlan->id,
                 'billing_cycle' => 'yearly',
             ]);
 
@@ -556,16 +557,16 @@ class TenantProvisioningTest extends TestCase
         $this->assertFalse($freePlan->isPaid());
 
         $paidPlan = Plan::create([
-            'name'        => 'باقة ممتازة',
-            'slug'        => 'premium',
+            'name' => 'باقة ممتازة',
+            'slug' => 'premium',
             'description' => 'باقة مدفوعة',
-            'status'      => 'active',
+            'status' => 'active',
         ]);
         $paidPlan->prices()->create([
-            'price'         => 500.00,
-            'currency'      => 'SAR',
+            'price' => 500.00,
+            'currency' => 'SAR',
             'billing_cycle' => 'monthly',
-            'status'        => 'active',
+            'status' => 'active',
         ]);
 
         $this->assertFalse($paidPlan->isFree());
@@ -581,31 +582,31 @@ class TenantProvisioningTest extends TestCase
     public function test_admin_can_create_tenant_with_yearly_billing_cycle(): void
     {
         $paidPlan = Plan::create([
-            'name'        => 'باقة سنوية',
-            'slug'        => 'yearly-tier',
+            'name' => 'باقة سنوية',
+            'slug' => 'yearly-tier',
             'description' => 'باقة سنوية',
-            'status'      => 'active',
+            'status' => 'active',
         ]);
         $paidPlan->prices()->create([
-            'price'         => 1200.00,
-            'currency'      => 'SAR',
+            'price' => 1200.00,
+            'currency' => 'SAR',
             'billing_cycle' => 'yearly',
-            'status'        => 'active',
+            'status' => 'active',
         ]);
 
         $service = app(TenantService::class);
         $result = $service->createTenant(
             [
-                'name'       => 'شركة السنوي',
-                'slug'       => 'yearly-company',
+                'name' => 'شركة السنوي',
+                'slug' => 'yearly-company',
                 'company_cr' => '1010998877',
-                'email'      => 'info@yearly.sa',
-                'phone'      => '0555555555',
-                'status'     => 'active',
+                'email' => 'info@yearly.sa',
+                'phone' => '0555555555',
+                'status' => 'active',
             ],
             [
-                'name'     => 'مدير السنوي',
-                'email'    => 'admin@yearly.sa',
+                'name' => 'مدير السنوي',
+                'email' => 'admin@yearly.sa',
                 'password' => 'password123',
             ],
             $paidPlan->id,
@@ -629,45 +630,45 @@ class TenantProvisioningTest extends TestCase
      */
     public function test_admin_can_update_tenant_and_sync_subscription(): void
     {
-        $admin = \App\Modules\Web\Models\Admin::create([
-            'name'     => 'مدير المنصة',
-            'email'    => 'platform_admin@test.sa',
+        $admin = Admin::create([
+            'name' => 'مدير المنصة',
+            'email' => 'platform_admin@test.sa',
             'password' => bcrypt('admin_pass_123'),
         ]);
 
         $freePlan = Plan::where('slug', 'free')->first();
         $paidPlan = Plan::create([
-            'name'        => 'باقة الترقية',
-            'slug'        => 'upgrade-tier',
+            'name' => 'باقة الترقية',
+            'slug' => 'upgrade-tier',
             'description' => 'باقة ترقية',
-            'status'      => 'active',
+            'status' => 'active',
         ]);
         $paidPlan->prices()->create([
-            'price'         => 499.00,
-            'currency'      => 'SAR',
+            'price' => 499.00,
+            'currency' => 'SAR',
             'billing_cycle' => 'monthly',
-            'status'        => 'active',
+            'status' => 'active',
         ]);
         $paidPlan->prices()->create([
-            'price'         => 4990.00,
-            'currency'      => 'SAR',
+            'price' => 4990.00,
+            'currency' => 'SAR',
             'billing_cycle' => 'yearly',
-            'status'        => 'active',
+            'status' => 'active',
         ]);
 
         $service = app(TenantService::class);
         $result = $service->createTenant(
             [
-                'name'       => 'شركة الترقية',
-                'slug'       => 'upgrade-comp',
+                'name' => 'شركة الترقية',
+                'slug' => 'upgrade-comp',
                 'company_cr' => '1010112233',
-                'email'      => 'upgrade@company.sa',
-                'phone'      => '0511111111',
-                'status'     => 'active',
+                'email' => 'upgrade@company.sa',
+                'phone' => '0511111111',
+                'status' => 'active',
             ],
             [
-                'name'     => 'مدير الترقية',
-                'email'    => 'admin@upgrade.sa',
+                'name' => 'مدير الترقية',
+                'email' => 'admin@upgrade.sa',
                 'password' => 'secret123',
             ],
             $freePlan->id,
@@ -680,13 +681,13 @@ class TenantProvisioningTest extends TestCase
         // ترقية المنشأة عبر المتحكم باستخدام دورة سنوية
         $response = $this->actingAs($admin)
             ->put(route('tenants.update', $tenant), [
-                'name'          => 'شركة الترقية المحدثة',
-                'slug'          => 'upgrade-comp',
-                'company_cr'    => '1010112233',
-                'email'         => 'upgrade@company.sa',
-                'phone'         => '0511111111',
-                'status'        => 'active',
-                'plan_id'       => $paidPlan->id,
+                'name' => 'شركة الترقية المحدثة',
+                'slug' => 'upgrade-comp',
+                'company_cr' => '1010112233',
+                'email' => 'upgrade@company.sa',
+                'phone' => '0511111111',
+                'status' => 'active',
+                'plan_id' => $paidPlan->id,
                 'billing_cycle' => 'yearly',
             ]);
 

@@ -96,7 +96,7 @@ class PlanController extends Controller
 
     public function matrix()
     {
-        $plans    = Plan::with(['prices', 'features'])->get();
+        $plans = Plan::with(['prices', 'features'])->get();
         $features = Feature::all();
 
         return view('plans.matrix', compact('plans', 'features'));
@@ -107,7 +107,7 @@ class PlanController extends Controller
         $allFeatures = Feature::all();
 
         return [
-            'limits'   => $allFeatures->filter->isLimit(),
+            'limits' => $allFeatures->filter->isLimit(),
             'features' => $allFeatures->filter->isFeature(),
         ];
     }

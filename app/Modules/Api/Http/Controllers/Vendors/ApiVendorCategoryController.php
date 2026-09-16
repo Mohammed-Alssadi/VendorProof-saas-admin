@@ -5,7 +5,7 @@ namespace App\Modules\Api\Http\Controllers\Vendors;
 use App\Modules\Api\Http\Controllers\ApiController;
 use App\Modules\Api\Http\Requests\Vendors\StoreVendorCategoryRequest;
 use App\Modules\Api\Http\Requests\Vendors\UpdateVendorCategoryRequest;
-use App\Modules\Api\Models\Vendors\VendorCategory;
+use App\Modules\Api\Models\VendorCategory;
 use Illuminate\Http\JsonResponse;
 
 /**

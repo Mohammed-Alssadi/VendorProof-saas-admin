@@ -21,7 +21,7 @@ abstract class ApiRequest extends FormRequest
         throw new HttpResponseException(response()->json([
             'success' => false,
             'message' => 'البيانات المدخلة غير صالحة أو غير مكتملة.',
-            'errors'  => $validator->errors(),
+            'errors' => $validator->errors(),
         ], 422));
     }
 }

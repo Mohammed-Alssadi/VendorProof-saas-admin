@@ -199,5 +199,133 @@ DELETE          api/v1/vendors/{vendor}
 - تشغيل اختبارات النظام الشاملة بنجاح 100%:
   **112 passed (579 assertions)**.
 
+---
+
+## [الخطوة رقم: 5] - إنشاء ملفات ترحيل محرك الامتثال الذكي (Compliance Engine Migrations)
+
+### 1. السبب والهدف المعماري:
+- تأسيس البنية التحتية الصلبة لمحرك الامتثال الذكي عبر إنشاء ملفات الترحيل الأربعة المتبقية التي تفصل بين المتطلبات والوثائق المادية وتدعم العزل الصارم للمستأجر.
+- الالتزام التام بتوجيهات المستخدم: استخدام `UUID` كمفاتيح أساسية، إلغاء أي `nullable` على `tenant_id`، والتخلص من العلاقات الدائرية و`Schema::table` المعقدة.
+- الالتزام الصارم بعدم تنفيذ الترحيل (`php artisan migrate`)، والاقتصار على إنشاء ملفات PHP الترحيلية المنسقة بنجاح.
+
+---
+
+### 2. الملفات المضافة:
+1. `app/Modules/Api/Database/Migrations/2026_09_15_000002_create_document_types_table.php` (جدول كتالوج أنواع الوثائق والشهادات بـ UUID)
+2. `app/Modules/Api/Database/Migrations/2026_09_15_000003_create_vendor_category_requirements_table.php` (جدول قوالب متطلبات التصنيفات بـ UUID)
+3. `app/Modules/Api/Database/Migrations/2026_09_15_000004_create_vendor_requirements_table.php` (جدول قائمة متطلبات المورد الفعلي واستثناءاته بـ UUID)
+4. `app/Modules/Api/Database/Migrations/2026_09_15_000005_create_vendor_documents_table.php` (جدول مستودع الوثائق المرفوعة وسجلات وتفاصيل تدقيق الـ AI بـ UUID)
+
+---
+
+## [الخطوة رقم: 6] - بناء موديول أنواع الوثائق والشهادات بالكامل وتسطيح مجلد الموديلات (Document Types Engine & Flattened Models Architecture)
+
+### 1. السبب والهدف المعماري:
+- تنفيذ المرحلة الأولى لبرمجة محرك الامتثال: بناء كتالوج أنواع الوثائق والشهادات (`document_types`) بالكامل ومطابقته لكافة المعايير الهندسية.
+- الالتزام بتوجيهات المستخدم الصارمة:
+  1. حظر المجلدات الفرعية داخل `app/Modules/Api/Models/` وتسطيح الموديلات لتكون مباشرة في جذر المجلد (`DocumentType.php`, `Vendor.php`, `VendorCategory.php`, `User.php`).
+  2. تحديث كافة الاستدعاءات الخاصة بـ `Vendor` و `VendorCategory` في الموديلات والمتحكمات والاختبارات.
+  3. ربط الـ CRUD كامل لـ `document-types` وفق معيار RESTful، والاعتماد على التحديث القياسي لحالة التفعيل (`is_active`).
+  4. كتابة اختبارات تكاملية شاملة تغطي عزل الـ Multi-Tenancy وتفرد الكود والاسم لكل مستأجر.
+
+---
+
+### 2. الملفات المضافة والمعدلة:
+1. `app/Modules/Api/Models/DocumentType.php` (موديل أنواع الوثائق مع UUID و BelongsToTenant و toApiArray)
+2. `app/Modules/Api/Models/Vendor.php` (نقل الموديل لمجلد Models المباشر وتحديث الـ namespace)
+3. `app/Modules/Api/Models/VendorCategory.php` (نقل الموديل لمجلد Models المباشر وتحديث الـ namespace)
+4. `app/Models/Tenant.php` (تحديث مسار الاستيراد لـ Vendor و VendorCategory)
+5. `app/Modules/Api/Http/Requests/Documents/StoreDocumentTypeRequest.php` (قواعد التحقق ورسائل الخطأ بالعربية)
+6. `app/Modules/Api/Http/Requests/Documents/UpdateDocumentTypeRequest.php` (قواعد التحديث وتجاهل السجل الحالي)
+7. `app/Modules/Api/Http/Controllers/Documents/ApiDocumentTypeController.php` (متحكم API القياسي الموروث من ApiController)
+8. `app/Modules/Api/routes/api.php` (تسجيل مسار `apiResource('document-types')` المحمي بـ Sanctum)
+9. `tests/Feature/DocumentTypeApiTest.php` (10 اختبارات دقيقة تغطي التوثيق والتحقق والعزل والتصفية)
+
+---
+
+### 3. النتيجة والتحقق (Verification):
+- اجتياز اختبارات أنواع الوثائق بنجاح:
+  `php artisan test --filter=DocumentTypeApiTest` -> **10 passed (24 assertions)**.
+- اجتياز كامل اختبارات النظام الشاملة بنجاح ودون أي تراجع (Zero Regressions):
+  `php artisan test` -> **122 passed (603 assertions)**.
+- التوافق التام مع معايير الستايل وأداة لارافيل بينت:
+  `./vendor/bin/pint --test` -> **passed**.
+
+---
+
+## [الخطوة رقم: 7] - بناء موديول قوالب متطلبات التصنيفات بالكامل (Vendor Category Requirements Engine)
+
+### 1. السبب والهدف المعماري:
+- بناء محرك سياسات الامتثال (Policy Template Engine) الذي يربط بين تصنيفات الموردين (`vendor_categories`) وأنواع الوثائق والشهادات (`document_types`).
+- تمكين المنشأة من تحديد الوثائق الإلزامية والاختيارية وإرشاداتها لكل قطاع أو نشاط تجاري بشكل آلي ومرن.
+- الالتزام التام بكافة التوجيهات الهندسية:
+  1. وضع الموديل مباشرة في مجلد الموديلات المسطح `app/Modules/Api/Models/VendorCategoryRequirement.php`.
+  2. تنظيم طلبات التحقق داخل مجلد فرعي مخصص `app/Modules/Api/Http/Requests/Requirements/`.
+  3. فرض قيد الفرادة الصارم لمنع تكرار نفس نوع الوثيقة لنفس التصنيف داخل المنشأة الواحدة.
+  4. دمج بيانات نوع الوثيقة (`document_type`) تلقائياً ونظيفاً في دالة التسلسل `toApiArray()`.
+  5. كتابة اختبارات تكاملية شاملة تغطي الأمان والعزل والتفرد.
+
+---
+
+### 2. الملفات المضافة والمعدلة:
+1. `app/Modules/Api/Models/VendorCategoryRequirement.php` (موديل قوالب المتطلبات مع UUID و BelongsToTenant و toApiArray)
+2. `app/Modules/Api/Models/VendorCategory.php` (إضافة علاقة `requirements()` المباشرة)
+3. `app/Modules/Api/Models/DocumentType.php` (إضافة علاقة `categoryRequirements()` المباشرة)
+4. `app/Modules/Api/Http/Requests/Requirements/StoreCategoryRequirementRequest.php` (قواعد التحقق لمنع التكرار وضمان ملكية نوع الوثيقة والتصنيف)
+5. `app/Modules/Api/Http/Requests/Requirements/UpdateCategoryRequirementRequest.php` (دعم مرن لتحديث نوع الوثيقة document_type_id مع التحقق الذكي من عدم التكرار، بجانب الإلزامية والملاحظات بطلب واحد)
+6. `app/Modules/Api/Http/Controllers/Requirements/ApiVendorCategoryRequirementController.php` (متحكم API القياسي الموروث من ApiController)
+7. `app/Modules/Api/routes/api.php` (تسجيل مسارات استعراض وإضافة وتعديل وحذف متطلبات التصنيفات)
+8. `tests/Feature/VendorCategoryRequirementApiTest.php` (13 اختبار دقيق يغطي كافة السيناريوهات وعزل المستأجرين وتعديل نوع الوثيقة)
+
+---
+
+### 3. النتيجة والتحقق (Verification):
+- اجتياز اختبارات متطلبات التصنيفات بنجاح:
+  `php artisan test --filter=VendorCategoryRequirementApiTest` -> **13 passed (29 assertions)**.
+- اجتياز كامل اختبارات النظام الشاملة بنجاح ودون أي تراجع (Zero Regressions):
+  `php artisan test` -> **135 passed (632 assertions)**.
+- التوافق التام مع معايير الستايل وأداة لارافيل بينت:
+  `./vendor/bin/pint --test` -> **passed**.
+
+---
+
+## [الخطوة رقم: 8] - بناء موديول متطلبات المورد الفعلية ومحرك الأتمتة (Vendor Requirements & Auto-Provisioning Engine)
+
+### 1. السبب والهدف المعماري:
+- بناء لوحة الامتثال الفردية للمورد وتحويل سياسات وشروط التصنيف إلى قائمة مهام وشروط فعلية ملزمة لكل مورد.
+- إطلاق ميزة التوليد التلقائي (Auto-Provisioning): توليد قائمة المتطلبات فور إنشاء المورد وربطه بالتصنيف آلياً بأسلوب `firstOrCreate` لمنع التكرار وحماية السجلات السابقة.
+- تأسيس نظام الاستثناء والإعفاء الإداري المسبب (`waive` / `unwaive`) مع تسجيل سبب وتاريخ الاستثناء إدارياً، وإتاحة التراجع عنه.
+- احتساب نسبة الامتثال الحية آلياً وإرجاع ملخص إحصائي دقيق (`summary`) يوضح: الإجمالي، المستوفى، المفقود، المعفى، ونسبة الامتثال المئوية.
+- توثيق كافة الدوال الجديدة بتعليقات وDocblocks إنجليزية معيارية احترافية خالية من أي شوائب أو ترقيم مصطنع.
+- الالتزام التام بكافة المعايير الصارمة: الموديل مسطح مباشرة في `app/Modules/Api/Models/VendorRequirement.php`، طلبات التحقق مخصصة في مجلد `Requests/Requirements/`، وعزل الـ Multi-Tenancy بنسبة 100%.
+
+---
+
+### 2. الملفات المضافة والمعدلة:
+1. `app/Modules/Api/Models/VendorRequirement.php` (موديل متطلبات المورد مع ثوابت الحالات ودوال الإعفاء و toApiArray)
+2. `app/Modules/Api/Models/Vendor.php` (إضافة علاقة `requirements()` ودالة الأتمتة `syncCategoryRequirements()`)
+3. `app/Modules/Api/Models/DocumentType.php` (إضافة علاقة `vendorRequirements()`)
+4. `app/Modules/Api/Http/Controllers/Vendors/ApiVendorController.php` (تشغيل التوليد التلقائي فور إنشاء المورد الجديد)
+5. `app/Modules/Api/Http/Requests/Requirements/StoreVendorRequirementRequest.php` (قواعد إضافة متطلب مخصص للمورد)
+6. `app/Modules/Api/Http/Requests/Requirements/UpdateVendorRequirementRequest.php` (قواعد التعديل المرن للإلزامية والملاحظات والوثيقة)
+7. `app/Modules/Api/Http/Requests/Requirements/WaiveVendorRequirementRequest.php` (قواعد التحقق من إلزامية سبب الاستثناء الإداري)
+8. `app/Modules/Api/Http/Controllers/Requirements/ApiVendorRequirementController.php` (متحكم API القياسي الموروث من ApiController متضمناً حساب نسبة الامتثال والاستثناءات)
+9. `app/Modules/Api/routes/api.php` (تسجيل مسارات متطلبات الموردين والمزامنة والاستثناءات الإدارية)
+10. `tests/Feature/VendorRequirementApiTest.php` (13 اختبار تكاملي شامل يغطي الأتمتة والإعفاء وحساب النسبة والعزل)
+
+---
+
+### 3. النتيجة والتحقق (Verification):
+- اجتياز اختبارات متطلبات الموردين بنجاح:
+  `php artisan test --filter=VendorRequirementApiTest` -> **13 passed (31 assertions)**.
+- اجتياز كامل اختبارات النظام الشاملة بنجاح ودون أي تراجع (Zero Regressions):
+  `php artisan test` -> **148 passed (663 assertions)**.
+- التوافق التام مع معايير الستايل وأداة لارافيل بينت:
+  `./vendor/bin/pint --test` -> **passed**.
+
+
+
+
+
 
 

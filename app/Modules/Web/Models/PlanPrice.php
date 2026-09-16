@@ -65,6 +65,6 @@ class PlanPrice extends Model
      */
     public function formattedPrice(): string
     {
-        return number_format((float) $this->price, 2) . ' ' . $this->currency_symbol;
+        return number_format((float) $this->price, 2).' '.$this->currency_symbol;
     }
 }

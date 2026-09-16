@@ -4,6 +4,7 @@ namespace App\Modules\Web\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Support\Carbon;
 
 /**
  * Plan Feature pivot model representing plan-feature configuration and limit value.
@@ -12,11 +13,10 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property int $plan_id
  * @property int $feature_id
  * @property string $value
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- *
- * @property-read \App\Modules\Web\Models\Plan $plan
- * @property-read \App\Modules\Web\Models\Feature $feature
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Plan $plan
+ * @property-read Feature $feature
  */
 class PlanFeature extends Pivot
 {

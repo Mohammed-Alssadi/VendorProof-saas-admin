@@ -30,10 +30,10 @@ class ApiCompanyController extends ApiController
         }
 
         $tenant->update([
-            'name'       => $request->name,
+            'name' => $request->name,
             'company_cr' => $request->company_cr,
-            'email'      => $request->email,
-            'phone'      => $request->phone,
+            'email' => $request->email,
+            'phone' => $request->phone,
         ]);
 
         return $this->successResponse($tenant->toApiArray(), 'تم تحديث بيانات المنشأة بنجاح.');

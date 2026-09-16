@@ -17,7 +17,7 @@ class StripeWebhookController extends ApiController
      */
     public function handle(Request $request, StripePaymentService $stripeService): JsonResponse
     {
-        $payload   = $request->getContent();
+        $payload = $request->getContent();
         $sigHeader = $request->header('Stripe-Signature') ?? '';
 
         $success = $stripeService->handleWebhook($payload, $sigHeader);

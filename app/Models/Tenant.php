@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\TenantScope;
 use App\Modules\Api\Models\User;
-use App\Modules\Api\Models\Vendors\Vendor;
+use App\Modules\Api\Models\Vendor;
 use App\Modules\Web\Models\Plan;
 use App\Modules\Web\Models\Subscription;
 use App\Traits\HasPlanFeatures;
@@ -21,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Tenant extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes, HasPlanFeatures;
+    use HasFactory, HasPlanFeatures, HasUuids, SoftDeletes;
 
     protected $table = 'tenants';
 
@@ -78,14 +77,14 @@ class Tenant extends Model
     public function toApiArray(): array
     {
         return [
-            'id'         => $this->id,
-            'name'       => $this->name,
-            'slug'       => $this->slug,
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
             'company_cr' => $this->company_cr,
-            'email'      => $this->email,
-            'phone'      => $this->phone,
-            'status'     => $this->status,
-            'plan'       => $this->currentPlan()?->toApiArray(),
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'status' => $this->status,
+            'plan' => $this->currentPlan()?->toApiArray(),
         ];
     }
 }

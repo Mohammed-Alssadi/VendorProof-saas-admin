@@ -5,7 +5,7 @@ namespace App\Modules\Api\Http\Controllers\Vendors;
 use App\Modules\Api\Http\Controllers\ApiController;
 use App\Modules\Api\Http\Requests\Vendors\StoreVendorRequest;
 use App\Modules\Api\Http\Requests\Vendors\UpdateVendorRequest;
-use App\Modules\Api\Models\Vendors\Vendor;
+use App\Modules\Api\Models\Vendor;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -33,6 +33,7 @@ class ApiVendorController extends ApiController
     public function store(StoreVendorRequest $request): JsonResponse
     {
         $vendor = Vendor::create($request->validated());
+        $vendor->syncCategoryRequirements();
 
         return $this->successResponse($vendor->load('category')->toApiArray(), 'تم إضافة المورد بنجاح', 201);
     }

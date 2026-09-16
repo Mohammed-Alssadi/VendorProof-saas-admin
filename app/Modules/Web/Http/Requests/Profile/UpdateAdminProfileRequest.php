@@ -17,21 +17,21 @@ class UpdateAdminProfileRequest extends FormRequest
         $adminId = Auth::id();
 
         return [
-            'name'  => ['required', 'string', 'min:2', 'max:255', 'regex:/[\pL]/u', 'not_regex:/^[0-9]+$/'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:admins,email,' . $adminId],
+            'name' => ['required', 'string', 'min:2', 'max:255', 'regex:/[\pL]/u', 'not_regex:/^[0-9]+$/'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:admins,email,'.$adminId],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required'  => 'حقل الاسم مطلوب.',
-            'name.min'       => 'حقل الاسم يجب ألا يقل عن حرفين.',
-            'name.regex'     => 'حقل الاسم يجب أن يحتوي على أحرف صالحة.',
+            'name.required' => 'حقل الاسم مطلوب.',
+            'name.min' => 'حقل الاسم يجب ألا يقل عن حرفين.',
+            'name.regex' => 'حقل الاسم يجب أن يحتوي على أحرف صالحة.',
             'name.not_regex' => 'حقل الاسم لا يمكن أن يتكون من أرقام فقط.',
             'email.required' => 'حقل البريد الإلكتروني مطلوب.',
-            'email.email'    => 'يرجى إدخال بريد إلكتروني صالح.',
-            'email.unique'   => 'البريد الإلكتروني مسجل مسبقاً لمشرف آخر.',
+            'email.email' => 'يرجى إدخال بريد إلكتروني صالح.',
+            'email.unique' => 'البريد الإلكتروني مسجل مسبقاً لمشرف آخر.',
         ];
     }
 }

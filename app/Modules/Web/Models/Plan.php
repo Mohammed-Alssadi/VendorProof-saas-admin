@@ -187,6 +187,7 @@ class Plan extends Model
 
             if ($value === '-1' || $value === 'unlimited') {
                 $limits[$feature->key] = -1;
+
                 continue;
             }
 
@@ -244,12 +245,12 @@ class Plan extends Model
     public function toApiArray(): array
     {
         return [
-            'id'          => $this->id,
-            'name'        => $this->name,
-            'slug'        => $this->slug,
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
             'description' => $this->description,
-            'limits'      => $this->dynamicLimits(),
-            'features'    => $this->dynamicFeatures(),
+            'limits' => $this->dynamicLimits(),
+            'features' => $this->dynamicFeatures(),
         ];
     }
 }

@@ -24,21 +24,21 @@ class TenantService
             $effectivePlan = $planId ? Plan::find($planId) : Plan::defaultFree();
 
             $tenant = Tenant::create([
-                'plan_id'    => $effectivePlan?->id,
-                'name'       => $tenantData['name'],
-                'slug'       => strtolower(trim($tenantData['slug'])),
+                'plan_id' => $effectivePlan?->id,
+                'name' => $tenantData['name'],
+                'slug' => strtolower(trim($tenantData['slug'])),
                 'company_cr' => $tenantData['company_cr'] ?? null,
-                'email'      => $tenantData['email'],
-                'phone'      => $tenantData['phone'] ?? null,
-                'status'     => $tenantData['status'] ?? 'active',
+                'email' => $tenantData['email'],
+                'phone' => $tenantData['phone'] ?? null,
+                'status' => $tenantData['status'] ?? 'active',
             ]);
 
             $user = User::create([
                 'tenant_id' => $tenant->id,
-                'name'      => $userData['name'],
-                'email'     => $userData['email'],
-                'password'  => Hash::make($userData['password']),
-                'status'    => 'active',
+                'name' => $userData['name'],
+                'email' => $userData['email'],
+                'password' => Hash::make($userData['password']),
+                'status' => 'active',
             ]);
 
             if ($effectivePlan) {
@@ -56,13 +56,13 @@ class TenantService
     {
         return DB::transaction(function () use ($tenant, $data, $planId, $billingCycle) {
             $tenant->update([
-                'plan_id'    => $planId ?? $tenant->plan_id,
-                'name'       => $data['name'] ?? $tenant->name,
-                'slug'       => isset($data['slug']) ? strtolower(trim($data['slug'])) : $tenant->slug,
+                'plan_id' => $planId ?? $tenant->plan_id,
+                'name' => $data['name'] ?? $tenant->name,
+                'slug' => isset($data['slug']) ? strtolower(trim($data['slug'])) : $tenant->slug,
                 'company_cr' => $data['company_cr'] ?? $tenant->company_cr,
-                'email'      => $data['email'] ?? $tenant->email,
-                'phone'      => $data['phone'] ?? $tenant->phone,
-                'status'     => $data['status'] ?? $tenant->status,
+                'email' => $data['email'] ?? $tenant->email,
+                'phone' => $data['phone'] ?? $tenant->phone,
+                'status' => $data['status'] ?? $tenant->status,
             ]);
 
             if ($planId && $newPlan = Plan::find($planId)) {

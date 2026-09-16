@@ -24,27 +24,27 @@ class ApiPlanController extends ApiController
 
         $data = $plans->map(function (Plan $plan) {
             return [
-                'id'          => $plan->id,
-                'name'        => $plan->name,
-                'slug'        => $plan->slug,
+                'id' => $plan->id,
+                'name' => $plan->name,
+                'slug' => $plan->slug,
                 'description' => $plan->description,
-                'prices'      => [
+                'prices' => [
                     'monthly' => $plan->monthlyPrice ? [
-                        'id'              => $plan->monthlyPrice->id,
-                        'price'           => (string) $plan->monthlyPrice->price,
-                        'currency'        => $plan->monthlyPrice->currency,
+                        'id' => $plan->monthlyPrice->id,
+                        'price' => (string) $plan->monthlyPrice->price,
+                        'currency' => $plan->monthlyPrice->currency,
                         'currency_symbol' => $plan->monthlyPrice->currency_symbol,
-                        'billing_cycle'   => 'monthly',
+                        'billing_cycle' => 'monthly',
                     ] : null,
                     'yearly' => $plan->yearlyPrice ? [
-                        'id'              => $plan->yearlyPrice->id,
-                        'price'           => (string) $plan->yearlyPrice->price,
-                        'currency'        => $plan->yearlyPrice->currency,
+                        'id' => $plan->yearlyPrice->id,
+                        'price' => (string) $plan->yearlyPrice->price,
+                        'currency' => $plan->yearlyPrice->currency,
                         'currency_symbol' => $plan->yearlyPrice->currency_symbol,
-                        'billing_cycle'   => 'yearly',
+                        'billing_cycle' => 'yearly',
                     ] : null,
                 ],
-                'checklist'   => $plan->checklist(),
+                'checklist' => $plan->checklist(),
             ];
         });
 

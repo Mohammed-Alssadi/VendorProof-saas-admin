@@ -12,15 +12,12 @@ use Illuminate\Database\Seeder;
  *
  * يتولى تشغيل زارعي البيانات المعتمدين لتجهيز قاعدة البيانات الأولية.
  *
- * @package Database\Seeders
  * @author VendorProof Platform Architecture
  */
 class DatabaseSeeder extends Seeder
 {
     /**
      * تشغيل زارعي البيانات المعتمدين للمنصة.
-     *
-     * @return void
      */
     public function run(): void
     {

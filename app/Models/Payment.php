@@ -32,7 +32,7 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'amount'  => 'decimal:2',
+        'amount' => 'decimal:2',
         'paid_at' => 'datetime',
     ];
 
@@ -75,17 +75,17 @@ class Payment extends Model
     {
         $symbol = PlanPrice::getCurrencySymbol($this->currency);
 
-        return number_format((float) $this->amount, 2) . ' ' . $symbol;
+        return number_format((float) $this->amount, 2).' '.$symbol;
     }
 
     public function statusLabelArabic(): string
     {
         return match ($this->status) {
-            'paid'     => 'مسددة',
-            'pending'  => 'بانتظار السداد',
-            'failed'   => 'تعثر السداد',
+            'paid' => 'مسددة',
+            'pending' => 'بانتظار السداد',
+            'failed' => 'تعثر السداد',
             'refunded' => 'مستردة',
-            default    => $this->status,
+            default => $this->status,
         };
     }
 

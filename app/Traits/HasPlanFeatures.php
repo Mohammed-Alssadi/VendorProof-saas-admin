@@ -69,8 +69,8 @@ trait HasPlanFeatures
         }
 
         $planFeatures = $plan->features->keyBy('key');
-        $allFeatures  = Feature::all();
-        $locked       = [];
+        $allFeatures = Feature::all();
+        $locked = [];
 
         foreach ($allFeatures as $feature) {
             $pf = $planFeatures->get($feature->key);

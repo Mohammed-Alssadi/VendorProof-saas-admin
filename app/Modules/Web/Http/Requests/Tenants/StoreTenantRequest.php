@@ -37,7 +37,7 @@ class StoreTenantRequest extends FormRequest
             'admin_password' => ['required', 'string', 'min:8'],
 
             // 3. باقة الاشتراك ودورة الفوترة
-            'plan_id'       => ['nullable', 'exists:plans,id'],
+            'plan_id' => ['nullable', 'exists:plans,id'],
             'billing_cycle' => ['nullable', 'in:monthly,yearly'],
         ];
     }

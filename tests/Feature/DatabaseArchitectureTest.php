@@ -14,8 +14,6 @@ use Tests\TestCase;
  *
  * تغطي التحقق من وجود كافة جداول المنظومة (المشرفين، المنشآت، المستخدمين، الخطط، الميزات، الاشتراكات)،
  * وضمان تطبيق مفاتيح UUID، وقيد فريد للبريد الإلكتروني على مستوى المنشأة، وسلامة تدفق الفوترة.
- *
- * @package Tests\Feature
  */
 class DatabaseArchitectureTest extends TestCase
 {

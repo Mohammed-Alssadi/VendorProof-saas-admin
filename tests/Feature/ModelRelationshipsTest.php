@@ -16,8 +16,6 @@ use Tests\TestCase;
  *
  * تغطي التحقق من علاقات المشتركين والمستخدمين، وعلاقات الباقات بالأسعار والميزات والحدود التشغيلية،
  * وسلامة عمل دوال الفحص المساعدة (hasFeature, getLimit, isUnlimited, getLimitDisplay).
- *
- * @package Tests\Feature
  */
 class ModelRelationshipsTest extends TestCase
 {

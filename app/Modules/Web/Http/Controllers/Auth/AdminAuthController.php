@@ -55,10 +55,10 @@ class AdminAuthController extends Controller
     public function register(AdminRegisterRequest $request)
     {
         $admin = Admin::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
-            'status'   => 'active',
+            'status' => 'active',
         ]);
 
         Auth::login($admin);

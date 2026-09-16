@@ -28,13 +28,13 @@ class ApiAuthController extends ApiController
         $token = $user->createToken('client-token')->plainTextToken;
 
         return $this->successResponse([
-            'token'           => $token,
-            'user'            => [
-                'id'    => $user->id,
-                'name'  => $user->name,
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
                 'email' => $user->email,
             ],
-            'tenant'          => $user->tenant?->toApiArray(),
+            'tenant' => $user->tenant?->toApiArray(),
             'locked_features' => $user->tenant ? $user->tenant->lockedFeatureKeys() : [],
         ], 'تم تسجيل الدخول بنجاح.');
     }
@@ -44,16 +44,16 @@ class ApiAuthController extends ApiController
      */
     public function me(Request $request)
     {
-        $user   = $request->user()->load('tenant.plan');
+        $user = $request->user()->load('tenant.plan');
         $tenant = $user->tenant;
 
         return $this->successResponse([
-            'user'            => [
-                'id'    => $user->id,
-                'name'  => $user->name,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
                 'email' => $user->email,
             ],
-            'tenant'          => $tenant?->toApiArray(),
+            'tenant' => $tenant?->toApiArray(),
             'locked_features' => $tenant ? $tenant->lockedFeatureKeys() : [],
         ]);
     }

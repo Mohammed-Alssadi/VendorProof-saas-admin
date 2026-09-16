@@ -14,7 +14,7 @@ class PaymentController extends Controller
             ->paginate(15);
 
         $totalRevenue = Payment::where('status', 'paid')->sum('amount');
-        $paidCount    = Payment::where('status', 'paid')->count();
+        $paidCount = Payment::where('status', 'paid')->count();
 
         return view('payments.index', compact('payments', 'totalRevenue', 'paidCount'));
     }

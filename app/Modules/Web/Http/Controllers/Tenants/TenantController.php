@@ -29,17 +29,17 @@ class TenantController extends Controller
     public function store(StoreTenantRequest $request, TenantService $tenantService)
     {
         $tenantData = [
-            'name'       => $request->name,
-            'slug'       => $request->slug,
+            'name' => $request->name,
+            'slug' => $request->slug,
             'company_cr' => $request->company_cr,
-            'email'      => $request->email,
-            'phone'      => $request->phone,
-            'status'     => 'active',
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'status' => 'active',
         ];
 
         $userData = [
-            'name'     => $request->admin_name,
-            'email'    => $request->admin_email,
+            'name' => $request->admin_name,
+            'email' => $request->admin_email,
             'password' => $request->admin_password,
         ];
 
@@ -64,7 +64,7 @@ class TenantController extends Controller
     public function edit(Tenant $tenant)
     {
         $tenant->loadMissing(['plan', 'currentSubscription.planPrice']);
-        $plans               = Plan::active()->with('prices')->get();
+        $plans = Plan::active()->with('prices')->get();
         $currentBillingCycle = $tenant->currentSubscription?->planPrice?->billing_cycle ?? 'monthly';
 
         return view('tenants.edit', compact('tenant', 'plans', 'currentBillingCycle'));

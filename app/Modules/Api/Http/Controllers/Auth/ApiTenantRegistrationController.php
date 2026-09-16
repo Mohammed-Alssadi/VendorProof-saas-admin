@@ -22,33 +22,33 @@ class ApiTenantRegistrationController extends ApiController
 
         $result = $tenantService->createTenant(
             [
-                'name'       => $request->company_name,
-                'slug'       => $request->slug,
+                'name' => $request->company_name,
+                'slug' => $request->slug,
                 'company_cr' => $request->company_cr,
-                'email'      => $request->company_email ?? $request->email,
-                'phone'      => $request->phone,
-                'status'     => 'active',
+                'email' => $request->company_email ?? $request->email,
+                'phone' => $request->phone,
+                'status' => 'active',
             ],
             [
-                'name'     => $request->name,
-                'email'    => $request->email,
+                'name' => $request->name,
+                'email' => $request->email,
                 'password' => $request->password,
             ],
             $freePlan->id
         );
 
-        $user   = $result['user'];
+        $user = $result['user'];
         $tenant = $result['tenant'];
-        $token  = $user->createToken('client-token')->plainTextToken;
+        $token = $user->createToken('client-token')->plainTextToken;
 
         return $this->successResponse([
-            'token'           => $token,
-            'user'            => [
-                'id'    => $user->id,
-                'name'  => $user->name,
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
                 'email' => $user->email,
             ],
-            'tenant'          => $tenant->toApiArray(),
+            'tenant' => $tenant->toApiArray(),
             'locked_features' => $tenant->lockedFeatureKeys(),
         ], 'تم إنشاء حساب المنشأة وتفعيل باقة الاستخدام المجانية بنجاح.', 201);
     }

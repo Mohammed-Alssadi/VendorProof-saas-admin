@@ -11,11 +11,10 @@ use Illuminate\Support\Facades\Hash;
  */
 class CloseCompanyAccountRequest extends ApiRequest
 {
-
     public function rules(): array
     {
         return [
-            'current_password'  => ['required', 'string'],
+            'current_password' => ['required', 'string'],
             'confirmation_name' => ['required', 'string'],
         ];
     }
@@ -23,7 +22,7 @@ class CloseCompanyAccountRequest extends ApiRequest
     public function messages(): array
     {
         return [
-            'current_password.required'  => 'كلمة المرور الحالية مطلوبة لتأكيد إغلاق المنشأة.',
+            'current_password.required' => 'كلمة المرور الحالية مطلوبة لتأكيد إغلاق المنشأة.',
             'confirmation_name.required' => 'يرجى إدخال اسم المنشأة الصريح لتأكيد عملية الإغلاق.',
         ];
     }

@@ -22,11 +22,17 @@ class StripePaymentIntegrationTest extends TestCase
     use RefreshDatabase;
 
     private Tenant $tenant;
+
     private User $user;
+
     private Plan $freePlan;
+
     private Plan $proPlan;
+
     private PlanPrice $proMonthlyPrice;
+
     private PlanPrice $proYearlyPrice;
+
     private string $token;
 
     protected function setUp(): void
@@ -35,57 +41,57 @@ class StripePaymentIntegrationTest extends TestCase
 
         // 1. إنشاء باقة مجانية افتراضية
         $this->freePlan = Plan::create([
-            'name'        => 'الباقة المجانية',
-            'slug'        => 'free',
+            'name' => 'الباقة المجانية',
+            'slug' => 'free',
             'description' => 'باقة مجانية دائمة',
-            'status'      => 'active',
+            'status' => 'active',
         ]);
 
         $this->freePlan->prices()->create([
-            'price'         => 0.00,
-            'currency'      => 'SAR',
+            'price' => 0.00,
+            'currency' => 'SAR',
             'billing_cycle' => 'monthly',
-            'status'        => 'active',
+            'status' => 'active',
         ]);
 
         // 2. إنشاء باقة مدفوعة باشتراك شهري وسنوي
         $this->proPlan = Plan::create([
-            'name'        => 'الباقة الاحترافية',
-            'slug'        => 'pro',
+            'name' => 'الباقة الاحترافية',
+            'slug' => 'pro',
             'description' => 'باقة متقدمة للمنشآت',
-            'status'      => 'active',
+            'status' => 'active',
         ]);
 
         $this->proMonthlyPrice = $this->proPlan->prices()->create([
-            'price'         => 299.00,
-            'currency'      => 'SAR',
+            'price' => 299.00,
+            'currency' => 'SAR',
             'billing_cycle' => 'monthly',
-            'status'        => 'active',
+            'status' => 'active',
         ]);
 
         $this->proYearlyPrice = $this->proPlan->prices()->create([
-            'price'         => 2990.00,
-            'currency'      => 'SAR',
+            'price' => 2990.00,
+            'currency' => 'SAR',
             'billing_cycle' => 'yearly',
-            'status'        => 'active',
+            'status' => 'active',
         ]);
 
         // 3. إنشاء منشأة ومستخدم مسؤول مع اشتراك مجاني مبدئي
         $this->tenant = Tenant::create([
-            'plan_id'    => $this->freePlan->id,
-            'name'       => 'شركة السداد التجريبية',
-            'slug'       => 'pay-test-co',
-            'email'      => 'billing@pay-test.sa',
+            'plan_id' => $this->freePlan->id,
+            'name' => 'شركة السداد التجريبية',
+            'slug' => 'pay-test-co',
+            'email' => 'billing@pay-test.sa',
             'company_cr' => '1010887766',
-            'status'     => 'active',
+            'status' => 'active',
         ]);
 
         $this->user = User::create([
             'tenant_id' => $this->tenant->id,
-            'name'      => 'مدير المدفوعات',
-            'email'     => 'admin@pay-test.sa',
-            'password'  => bcrypt('secret123'),
-            'status'    => 'active',
+            'name' => 'مدير المدفوعات',
+            'email' => 'admin@pay-test.sa',
+            'password' => bcrypt('secret123'),
+            'status' => 'active',
         ]);
 
         app(SubscriptionService::class)->createSubscription($this->tenant, $this->freePlan, 'monthly');
@@ -110,7 +116,7 @@ class StripePaymentIntegrationTest extends TestCase
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->postJson('/api/v1/subscription/checkout', [
-                'plan_id'       => $this->proPlan->id,
+                'plan_id' => $this->proPlan->id,
                 'billing_cycle' => 'monthly',
             ]);
 
@@ -126,7 +132,7 @@ class StripePaymentIntegrationTest extends TestCase
     {
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->postJson('/api/v1/subscription/checkout', [
-                'plan_id'       => $this->freePlan->id,
+                'plan_id' => $this->freePlan->id,
                 'billing_cycle' => 'monthly',
             ]);
 
@@ -144,7 +150,7 @@ class StripePaymentIntegrationTest extends TestCase
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->postJson('/api/v1/subscription/checkout', [
-                'plan_id'       => $this->freePlan->id,
+                'plan_id' => $this->freePlan->id,
                 'billing_cycle' => 'monthly',
             ]);
 
@@ -158,22 +164,22 @@ class StripePaymentIntegrationTest extends TestCase
     {
         // 1. إنشاء دفعة معلقة
         $payment = Payment::create([
-            'tenant_id'     => $this->tenant->id,
-            'plan_id'       => $this->proPlan->id,
+            'tenant_id' => $this->tenant->id,
+            'plan_id' => $this->proPlan->id,
             'plan_price_id' => $this->proYearlyPrice->id,
-            'amount'        => 2990.00,
-            'currency'      => 'SAR',
+            'amount' => 2990.00,
+            'currency' => 'SAR',
             'billing_cycle' => 'yearly',
-            'status'        => 'pending',
-            'gateway'       => 'stripe',
+            'status' => 'pending',
+            'gateway' => 'stripe',
         ]);
 
         // 2. محاكاة كائن جلسة سترايب المستلمة من الويب هوك
         $session = Session::constructFrom([
-            'id'                   => 'cs_test_completed_123',
-            'payment_intent'       => 'pi_test_intent_456',
+            'id' => 'cs_test_completed_123',
+            'payment_intent' => 'pi_test_intent_456',
             'payment_method_types' => ['card'],
-            'metadata'             => [
+            'metadata' => [
                 'payment_id' => (string) $payment->id,
             ],
         ]);
@@ -207,23 +213,23 @@ class StripePaymentIntegrationTest extends TestCase
     public function test_webhook_idempotency_prevents_duplicate_processing(): void
     {
         $payment = Payment::create([
-            'tenant_id'            => $this->tenant->id,
-            'plan_id'              => $this->proPlan->id,
-            'plan_price_id'        => $this->proMonthlyPrice->id,
-            'amount'               => 299.00,
-            'currency'             => 'SAR',
-            'billing_cycle'        => 'monthly',
-            'status'               => 'paid',
-            'paid_at'              => now(),
+            'tenant_id' => $this->tenant->id,
+            'plan_id' => $this->proPlan->id,
+            'plan_price_id' => $this->proMonthlyPrice->id,
+            'amount' => 299.00,
+            'currency' => 'SAR',
+            'billing_cycle' => 'monthly',
+            'status' => 'paid',
+            'paid_at' => now(),
             'gateway_reference_id' => 'pi_already_paid',
-            'gateway'              => 'stripe',
+            'gateway' => 'stripe',
         ]);
 
         $session = Session::constructFrom([
-            'id'                   => 'cs_test_dup_123',
-            'payment_intent'       => 'pi_already_paid',
+            'id' => 'cs_test_dup_123',
+            'payment_intent' => 'pi_already_paid',
             'payment_method_types' => ['card'],
-            'metadata'             => [
+            'metadata' => [
                 'payment_id' => (string) $payment->id,
             ],
         ]);
@@ -247,10 +253,10 @@ class StripePaymentIntegrationTest extends TestCase
 
         // 2. إنشاء اشتراك مدفوع منتهٍ في الماضي
         Subscription::create([
-            'tenant_id'          => $this->tenant->id,
-            'plan_price_id'      => $this->proMonthlyPrice->id,
-            'status'             => 'active',
-            'starts_at'          => now()->subMonths(2),
+            'tenant_id' => $this->tenant->id,
+            'plan_price_id' => $this->proMonthlyPrice->id,
+            'status' => 'active',
+            'starts_at' => now()->subMonths(2),
             'current_period_end' => now()->subDay(), // انتهت الصلاحية بالأمس
         ]);
 

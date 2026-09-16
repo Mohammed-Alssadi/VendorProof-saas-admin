@@ -45,9 +45,9 @@ class UpdateTenantRequest extends FormRequest
             'phone' => ['required', 'string', 'regex:/^(\+?[0-9\s\-]{7,20})$/'],
 
             // 2. باقة المنشأة والحالة التشغيلية ودورة الفوترة
-            'plan_id'       => ['required', 'exists:plans,id'],
+            'plan_id' => ['required', 'exists:plans,id'],
             'billing_cycle' => ['nullable', 'in:monthly,yearly'],
-            'status'        => ['required', 'in:active,suspended'],
+            'status' => ['required', 'in:active,suspended'],
         ];
     }
 

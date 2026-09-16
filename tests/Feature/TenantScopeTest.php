@@ -12,8 +12,6 @@ use Tests\TestCase;
  *
  * تغطي التحقق من فاعلية النطاق العام (Global Scope) في منع تسرب البيانات بين المنشآت،
  * والملء التلقائي لمعرف المنشأة (tenant_id) عند إنشاء السجلات الجديدة عبر الموديل.
- *
- * @package Tests\Feature
  */
 class TenantScopeTest extends TestCase
 {
@@ -26,30 +24,30 @@ class TenantScopeTest extends TestCase
     {
         // 1. إنشاء شركتين
         $tenantA = Tenant::create([
-            'name'  => 'شركة الأمل',
-            'slug'  => 'hope-co',
+            'name' => 'شركة الأمل',
+            'slug' => 'hope-co',
             'email' => 'info@hope.sa',
         ]);
 
         $tenantB = Tenant::create([
-            'name'  => 'شركة المجد',
-            'slug'  => 'glory-co',
+            'name' => 'شركة المجد',
+            'slug' => 'glory-co',
             'email' => 'info@glory.sa',
         ]);
 
         // 2. إنشاء مستخدم أساسي لكل شركة (مع تمرير tenant_id يدوياً)
         $userA = User::create([
             'tenant_id' => $tenantA->id,
-            'name'      => 'أحمد من شركة الأمل',
-            'email'     => 'ahmed@hope.sa',
-            'password'  => 'password123',
+            'name' => 'أحمد من شركة الأمل',
+            'email' => 'ahmed@hope.sa',
+            'password' => 'password123',
         ]);
 
         $userB = User::create([
             'tenant_id' => $tenantB->id,
-            'name'      => 'سعيد من شركة المجد',
-            'email'     => 'saeed@glory.sa',
-            'password'  => 'password123',
+            'name' => 'سعيد من شركة المجد',
+            'email' => 'saeed@glory.sa',
+            'password' => 'password123',
         ]);
 
         // 3. المحاكاة: تسجيل الدخول كمستخدم شركة الأمل (Tenant A)
@@ -57,8 +55,8 @@ class TenantScopeTest extends TestCase
 
         // إنشاء مستخدم جديد دون كتابة tenant_id - يجب أن يُملأ تلقائياً!
         $newUserA = User::create([
-            'name'     => 'موظف جديد في شركة الأمل',
-            'email'    => 'new_emp@hope.sa',
+            'name' => 'موظف جديد في شركة الأمل',
+            'email' => 'new_emp@hope.sa',
             'password' => 'password123',
         ]);
 

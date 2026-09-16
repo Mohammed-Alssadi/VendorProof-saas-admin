@@ -30,31 +30,31 @@ class StripePaymentService
     public function createCheckoutSession(Tenant $tenant, Plan $plan, PlanPrice $planPrice, string $successUrl, string $cancelUrl)
     {
         $payment = Payment::create([
-            'tenant_id'     => $tenant->id,
-            'plan_id'       => $plan->id,
+            'tenant_id' => $tenant->id,
+            'plan_id' => $plan->id,
             'plan_price_id' => $planPrice->id,
-            'amount'        => $planPrice->price,
-            'currency'      => $planPrice->currency ?? 'SAR',
+            'amount' => $planPrice->price,
+            'currency' => $planPrice->currency ?? 'SAR',
             'billing_cycle' => $planPrice->billing_cycle,
-            'status'        => 'pending',
-            'gateway'       => 'stripe',
+            'status' => 'pending',
+            'gateway' => 'stripe',
         ]);
 
         $unitAmount = (int) round((float) $planPrice->price * 100);
 
         $session = Session::create([
             'payment_method_types' => ['card'],
-            'mode'                 => 'payment',
-            'locale'               => 'ar',
-            'customer_email'       => $tenant->email,
-            'client_reference_id'  => (string) $payment->id,
-            'line_items'           => [
+            'mode' => 'payment',
+            'locale' => 'ar',
+            'customer_email' => $tenant->email,
+            'client_reference_id' => (string) $payment->id,
+            'line_items' => [
                 [
                     'price_data' => [
-                        'currency'     => strtolower($planPrice->currency ?? 'sar'),
-                        'unit_amount'  => $unitAmount,
+                        'currency' => strtolower($planPrice->currency ?? 'sar'),
+                        'unit_amount' => $unitAmount,
                         'product_data' => [
-                            'name'        => 'ترقية '.$plan->name.' ('.($planPrice->billing_cycle === 'yearly' ? 'اشتراك سنوي' : 'اشتراك شهري').')',
+                            'name' => 'ترقية '.$plan->name.' ('.($planPrice->billing_cycle === 'yearly' ? 'اشتراك سنوي' : 'اشتراك شهري').')',
                             'description' => 'منشأة: '.$tenant->name,
                         ],
                     ],
@@ -65,7 +65,7 @@ class StripePaymentService
                 'payment_id' => (string) $payment->id,
             ],
             'success_url' => $successUrl,
-            'cancel_url'  => $cancelUrl,
+            'cancel_url' => $cancelUrl,
         ]);
 
         $payment->update([
@@ -117,11 +117,11 @@ class StripePaymentService
             }
 
             $payment->update([
-                'status'               => 'paid',
+                'status' => 'paid',
                 'gateway_reference_id' => $session->payment_intent ?? $session->id,
-                'payment_method'       => $session->payment_method_types[0] ?? 'card',
-                'receipt_url'          => $this->getReceiptUrl($session->payment_intent),
-                'paid_at'              => now(),
+                'payment_method' => $session->payment_method_types[0] ?? 'card',
+                'receipt_url' => $this->getReceiptUrl($session->payment_intent),
+                'paid_at' => now(),
             ]);
 
             $periodEnd = $payment->billing_cycle === 'yearly' ? now()->addYear() : now()->addMonth();
@@ -140,7 +140,7 @@ class StripePaymentService
 
         return rescue(function () use ($paymentIntentId) {
             $intent = PaymentIntent::retrieve([
-                'id'     => $paymentIntentId,
+                'id' => $paymentIntentId,
                 'expand' => ['latest_charge'],
             ]);
 

@@ -3,8 +3,11 @@
 use App\Modules\Api\Http\Controllers\Auth\ApiAuthController;
 use App\Modules\Api\Http\Controllers\Auth\ApiTenantRegistrationController;
 use App\Modules\Api\Http\Controllers\Company\ApiCompanyController;
+use App\Modules\Api\Http\Controllers\Documents\ApiDocumentTypeController;
 use App\Modules\Api\Http\Controllers\Plans\ApiPlanController;
 use App\Modules\Api\Http\Controllers\Profile\ApiProfileController;
+use App\Modules\Api\Http\Controllers\Requirements\ApiVendorCategoryRequirementController;
+use App\Modules\Api\Http\Controllers\Requirements\ApiVendorRequirementController;
 use App\Modules\Api\Http\Controllers\Subscription\ApiSubscriptionController;
 use App\Modules\Api\Http\Controllers\Vendors\ApiVendorCategoryController;
 use App\Modules\Api\Http\Controllers\Vendors\ApiVendorController;
@@ -19,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/ping', function () {
     return response()->json([
-        'status'  => 'ok',
+        'status' => 'ok',
         'message' => 'VendorProof Platform API is active and healthy',
     ]);
 });
@@ -55,5 +58,19 @@ Route::prefix('v1')->group(function () {
 
         Route::apiResource('vendor-categories', ApiVendorCategoryController::class);
         Route::apiResource('vendors', ApiVendorController::class);
+        Route::apiResource('document-types', ApiDocumentTypeController::class);
+
+        Route::get('vendor-categories/{vendor_category}/requirements', [ApiVendorCategoryRequirementController::class, 'index']);
+        Route::post('vendor-categories/{vendor_category}/requirements', [ApiVendorCategoryRequirementController::class, 'store']);
+        Route::put('category-requirements/{category_requirement}', [ApiVendorCategoryRequirementController::class, 'update']);
+        Route::delete('category-requirements/{category_requirement}', [ApiVendorCategoryRequirementController::class, 'destroy']);
+
+        Route::get('vendors/{vendor}/requirements', [ApiVendorRequirementController::class, 'index']);
+        Route::post('vendors/{vendor}/requirements', [ApiVendorRequirementController::class, 'store']);
+        Route::post('vendors/{vendor}/sync-requirements', [ApiVendorRequirementController::class, 'sync']);
+        Route::put('vendor-requirements/{vendor_requirement}', [ApiVendorRequirementController::class, 'update']);
+        Route::post('vendor-requirements/{vendor_requirement}/waive', [ApiVendorRequirementController::class, 'waive']);
+        Route::post('vendor-requirements/{vendor_requirement}/unwaive', [ApiVendorRequirementController::class, 'unwaive']);
+        Route::delete('vendor-requirements/{vendor_requirement}', [ApiVendorRequirementController::class, 'destroy']);
     });
 });

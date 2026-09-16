@@ -1,7 +1,11 @@
 <?php
 
+use App\Modules\Api\Providers\ApiModuleServiceProvider;
+use App\Modules\Web\Providers\WebModuleServiceProvider;
+use App\Providers\AppServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Modules\Web\Providers\WebModuleServiceProvider::class,
-    App\Modules\Api\Providers\ApiModuleServiceProvider::class,
+    AppServiceProvider::class,
+    WebModuleServiceProvider::class,
+    ApiModuleServiceProvider::class,
 ];

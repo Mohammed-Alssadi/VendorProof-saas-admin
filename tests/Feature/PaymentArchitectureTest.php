@@ -18,7 +18,9 @@ class PaymentArchitectureTest extends TestCase
     use RefreshDatabase;
 
     private Tenant $tenant;
+
     private Plan $plan;
+
     private PlanPrice $planPrice;
 
     protected function setUp(): void
@@ -26,25 +28,25 @@ class PaymentArchitectureTest extends TestCase
         parent::setUp();
 
         $this->tenant = Tenant::create([
-            'name'       => 'شركة التقنية المتقدمة',
-            'slug'       => 'advanced-tech',
-            'email'      => 'info@advancedtech.sa',
+            'name' => 'شركة التقنية المتقدمة',
+            'slug' => 'advanced-tech',
+            'email' => 'info@advancedtech.sa',
             'company_cr' => '1010998877',
-            'status'     => 'active',
+            'status' => 'active',
         ]);
 
         $this->plan = Plan::create([
-            'name'        => 'باقة النمو المتقدمة',
-            'slug'        => 'growth-pro',
+            'name' => 'باقة النمو المتقدمة',
+            'slug' => 'growth-pro',
             'description' => 'باقة الشركات المتوسطة',
-            'status'      => 'active',
+            'status' => 'active',
         ]);
 
         $this->planPrice = $this->plan->prices()->create([
-            'price'         => '499.00',
-            'currency'      => 'SAR',
+            'price' => '499.00',
+            'currency' => 'SAR',
             'billing_cycle' => 'monthly',
-            'status'        => 'active',
+            'status' => 'active',
         ]);
     }
 
@@ -81,14 +83,14 @@ class PaymentArchitectureTest extends TestCase
     public function test_payment_relationships_and_tenant_association(): void
     {
         $payment = Payment::create([
-            'tenant_id'     => $this->tenant->id,
-            'plan_id'       => $this->plan->id,
+            'tenant_id' => $this->tenant->id,
+            'plan_id' => $this->plan->id,
             'plan_price_id' => $this->planPrice->id,
-            'amount'        => '499.00',
-            'currency'      => 'SAR',
+            'amount' => '499.00',
+            'currency' => 'SAR',
             'billing_cycle' => 'monthly',
-            'status'        => 'pending',
-            'gateway'       => 'stripe',
+            'status' => 'pending',
+            'gateway' => 'stripe',
         ]);
 
         // التحقق من وصول الفاتورة للمنشأة والباقة
@@ -107,14 +109,14 @@ class PaymentArchitectureTest extends TestCase
     public function test_payment_helper_methods_and_formatting(): void
     {
         $pendingPayment = Payment::create([
-            'tenant_id'     => $this->tenant->id,
-            'plan_id'       => $this->plan->id,
+            'tenant_id' => $this->tenant->id,
+            'plan_id' => $this->plan->id,
             'plan_price_id' => $this->planPrice->id,
-            'amount'        => '499.00',
-            'currency'      => 'SAR',
+            'amount' => '499.00',
+            'currency' => 'SAR',
             'billing_cycle' => 'monthly',
-            'status'        => 'pending',
-            'gateway'       => 'stripe',
+            'status' => 'pending',
+            'gateway' => 'stripe',
         ]);
 
         $this->assertTrue($pendingPayment->isPending());
@@ -125,7 +127,7 @@ class PaymentArchitectureTest extends TestCase
 
         // تحويل الحالة إلى مدفوعة
         $pendingPayment->update([
-            'status'  => 'paid',
+            'status' => 'paid',
             'paid_at' => now(),
         ]);
 
@@ -137,14 +139,14 @@ class PaymentArchitectureTest extends TestCase
     {
         // 1. تسجيل دفعة معلقة مباشرة
         $payment = Payment::create([
-            'tenant_id'     => $this->tenant->id,
-            'plan_id'       => $this->plan->id,
+            'tenant_id' => $this->tenant->id,
+            'plan_id' => $this->plan->id,
             'plan_price_id' => $this->planPrice->id,
-            'amount'        => $this->planPrice->price,
-            'currency'      => $this->planPrice->currency,
+            'amount' => $this->planPrice->price,
+            'currency' => $this->planPrice->currency,
             'billing_cycle' => $this->planPrice->billing_cycle,
-            'status'        => 'pending',
-            'gateway'       => 'stripe',
+            'status' => 'pending',
+            'gateway' => 'stripe',
         ]);
 
         $this->assertNotNull($payment->id);
@@ -152,11 +154,11 @@ class PaymentArchitectureTest extends TestCase
 
         // 2. تحديث الدفعة بعد سداد سترايب بسطر مباشر وبسيط
         $payment->update([
-            'status'               => 'paid',
+            'status' => 'paid',
             'gateway_reference_id' => 'cs_test_sample_123',
-            'payment_method'       => 'card',
-            'receipt_url'          => 'https://pay.stripe.com/receipts/sample',
-            'paid_at'              => now(),
+            'payment_method' => 'card',
+            'receipt_url' => 'https://pay.stripe.com/receipts/sample',
+            'paid_at' => now(),
         ]);
 
         $this->assertTrue($payment->isPaid());

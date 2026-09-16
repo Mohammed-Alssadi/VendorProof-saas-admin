@@ -18,7 +18,7 @@ trait BelongsToTenant
      */
     protected static function bootBelongsToTenant(): void
     {
-        static::addGlobalScope(new TenantScope());
+        static::addGlobalScope(new TenantScope);
 
         static::creating(function ($model) {
             if (! $model->tenant_id && Auth::check() && Auth::user()->tenant_id) {

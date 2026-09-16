@@ -16,8 +16,11 @@ class PaymentManagementTest extends TestCase
     use RefreshDatabase;
 
     protected Admin $admin;
+
     protected Tenant $tenant;
+
     protected Plan $plan;
+
     protected PlanPrice $planPrice;
 
     protected function setUp(): void
@@ -25,34 +28,34 @@ class PaymentManagementTest extends TestCase
         parent::setUp();
 
         $this->admin = Admin::create([
-            'name'     => 'مدير النظام',
-            'email'    => 'admin@vendorproof.test',
+            'name' => 'مدير النظام',
+            'email' => 'admin@vendorproof.test',
             'password' => bcrypt('password123'),
         ]);
 
         $this->plan = Plan::create([
-            'name'        => 'باقة المؤسسات',
-            'slug'        => 'enterprise',
+            'name' => 'باقة المؤسسات',
+            'slug' => 'enterprise',
             'description' => 'باقة متقدمة',
-            'status'      => 'active',
+            'status' => 'active',
         ]);
 
         $this->planPrice = PlanPrice::create([
-            'plan_id'       => $this->plan->id,
-            'price'         => 1499.00,
-            'currency'      => 'SAR',
+            'plan_id' => $this->plan->id,
+            'price' => 1499.00,
+            'currency' => 'SAR',
             'billing_cycle' => 'monthly',
-            'is_active'     => true,
+            'is_active' => true,
         ]);
 
         $this->tenant = Tenant::create([
-            'name'       => 'شركة التقنية المتقدمة',
-            'slug'       => 'advanced-tech',
+            'name' => 'شركة التقنية المتقدمة',
+            'slug' => 'advanced-tech',
             'company_cr' => '1010998877',
-            'email'      => 'tenant@test.com',
-            'phone'      => '0501234567',
-            'status'     => 'active',
-            'plan_id'    => $this->plan->id,
+            'email' => 'tenant@test.com',
+            'phone' => '0501234567',
+            'status' => 'active',
+            'plan_id' => $this->plan->id,
         ]);
     }
 
@@ -66,16 +69,16 @@ class PaymentManagementTest extends TestCase
     public function test_admin_can_view_payments_index()
     {
         Payment::create([
-            'tenant_id'            => $this->tenant->id,
-            'plan_id'              => $this->plan->id,
-            'plan_price_id'        => $this->planPrice->id,
-            'amount'               => 1499.00,
-            'currency'             => 'SAR',
-            'billing_cycle'        => 'monthly',
-            'status'               => 'paid',
-            'gateway'              => 'stripe',
+            'tenant_id' => $this->tenant->id,
+            'plan_id' => $this->plan->id,
+            'plan_price_id' => $this->planPrice->id,
+            'amount' => 1499.00,
+            'currency' => 'SAR',
+            'billing_cycle' => 'monthly',
+            'status' => 'paid',
+            'gateway' => 'stripe',
             'gateway_reference_id' => 'pi_test_123456',
-            'paid_at'              => Carbon::now(),
+            'paid_at' => Carbon::now(),
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('payments.index'));
@@ -90,27 +93,27 @@ class PaymentManagementTest extends TestCase
     public function test_payments_table_has_filter_attributes_for_client_side_filtering()
     {
         Payment::create([
-            'tenant_id'            => $this->tenant->id,
-            'plan_id'              => $this->plan->id,
-            'plan_price_id'        => $this->planPrice->id,
-            'amount'               => 1499.00,
-            'currency'             => 'SAR',
-            'billing_cycle'        => 'monthly',
-            'status'               => 'paid',
-            'gateway'              => 'stripe',
+            'tenant_id' => $this->tenant->id,
+            'plan_id' => $this->plan->id,
+            'plan_price_id' => $this->planPrice->id,
+            'amount' => 1499.00,
+            'currency' => 'SAR',
+            'billing_cycle' => 'monthly',
+            'status' => 'paid',
+            'gateway' => 'stripe',
             'gateway_reference_id' => 'pi_paid_reference',
-            'paid_at'              => Carbon::now(),
+            'paid_at' => Carbon::now(),
         ]);
 
         Payment::create([
-            'tenant_id'            => $this->tenant->id,
-            'plan_id'              => $this->plan->id,
-            'plan_price_id'        => $this->planPrice->id,
-            'amount'               => 299.00,
-            'currency'             => 'SAR',
-            'billing_cycle'        => 'monthly',
-            'status'               => 'pending',
-            'gateway'              => 'stripe',
+            'tenant_id' => $this->tenant->id,
+            'plan_id' => $this->plan->id,
+            'plan_price_id' => $this->planPrice->id,
+            'amount' => 299.00,
+            'currency' => 'SAR',
+            'billing_cycle' => 'monthly',
+            'status' => 'pending',
+            'gateway' => 'stripe',
             'gateway_reference_id' => 'pi_pending_reference',
         ]);
 
@@ -148,16 +151,16 @@ class PaymentManagementTest extends TestCase
     public function test_admin_can_view_single_payment_show()
     {
         $payment = Payment::create([
-            'tenant_id'            => $this->tenant->id,
-            'plan_id'              => $this->plan->id,
-            'plan_price_id'        => $this->planPrice->id,
-            'amount'               => 1499.00,
-            'currency'             => 'SAR',
-            'billing_cycle'        => 'monthly',
-            'status'               => 'paid',
-            'gateway'              => 'stripe',
+            'tenant_id' => $this->tenant->id,
+            'plan_id' => $this->plan->id,
+            'plan_price_id' => $this->planPrice->id,
+            'amount' => 1499.00,
+            'currency' => 'SAR',
+            'billing_cycle' => 'monthly',
+            'status' => 'paid',
+            'gateway' => 'stripe',
             'gateway_reference_id' => 'pi_show_test_77',
-            'paid_at'              => Carbon::now(),
+            'paid_at' => Carbon::now(),
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('payments.show', $payment));

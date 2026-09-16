@@ -22,9 +22,9 @@ class ApiProfileController extends ApiController
         $user = $request->user();
 
         return $this->successResponse([
-            'id'         => $user->id,
-            'name'       => $user->name,
-            'email'      => $user->email,
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
             'created_at' => $user->created_at?->toISOString(),
         ]);
     }
@@ -55,9 +55,9 @@ class ApiProfileController extends ApiController
         $user->save();
 
         return $this->successResponse([
-            'id'         => $user->id,
-            'name'       => $user->name,
-            'email'      => $user->email,
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
             'created_at' => $user->created_at?->toISOString(),
         ], 'تم تحديث الملف الشخصي بنجاح.');
     }

@@ -48,10 +48,10 @@ class SubscriptionService
         }
 
         return Subscription::create([
-            'tenant_id'          => $tenant->id,
-            'plan_price_id'      => $planPrice?->id,
-            'status'             => 'active',
-            'starts_at'          => now(),
+            'tenant_id' => $tenant->id,
+            'plan_price_id' => $planPrice?->id,
+            'status' => 'active',
+            'starts_at' => now(),
             'current_period_end' => $currentPeriodEnd,
         ]);
     }
@@ -62,18 +62,18 @@ class SubscriptionService
         $tenant->load(['plan', 'currentSubscription.planPrice']);
 
         $subscription = $tenant->currentSubscription;
-        $planPrice    = $subscription?->planPrice;
+        $planPrice = $subscription?->planPrice;
 
         return [
-            'tenant'          => $tenant->toApiArray(),
-            'subscription'    => $subscription ? [
-                'id'                 => $subscription->id,
-                'status'             => $subscription->status,
-                'billing_cycle'      => $planPrice?->billing_cycle ?? 'monthly',
-                'price'              => $planPrice?->price ?? '0.00',
-                'currency'           => $planPrice?->currency ?? 'SAR',
-                'currency_symbol'    => $planPrice?->currency_symbol ?? 'ر.س',
-                'starts_at'          => $subscription->starts_at?->toISOString(),
+            'tenant' => $tenant->toApiArray(),
+            'subscription' => $subscription ? [
+                'id' => $subscription->id,
+                'status' => $subscription->status,
+                'billing_cycle' => $planPrice?->billing_cycle ?? 'monthly',
+                'price' => $planPrice?->price ?? '0.00',
+                'currency' => $planPrice?->currency ?? 'SAR',
+                'currency_symbol' => $planPrice?->currency_symbol ?? 'ر.س',
+                'starts_at' => $subscription->starts_at?->toISOString(),
                 'current_period_end' => $subscription->current_period_end?->toISOString(),
             ] : null,
             'locked_features' => $tenant->lockedFeatureKeys(),
@@ -101,7 +101,7 @@ class SubscriptionService
             $details = $this->getCurrentSubscriptionDetails($tenant);
 
             if (isset($details['subscription'])) {
-                $details['subscription']['status']      = 'canceled';
+                $details['subscription']['status'] = 'canceled';
                 $details['subscription']['canceled_at'] = now()->toISOString();
             }
 

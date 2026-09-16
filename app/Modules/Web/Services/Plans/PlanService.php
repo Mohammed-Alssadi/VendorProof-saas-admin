@@ -17,24 +17,24 @@ class PlanService
     {
         return DB::transaction(function () use ($request) {
             $plan = Plan::create([
-                'name'        => $request->name,
-                'slug'        => $request->slug,
+                'name' => $request->name,
+                'slug' => $request->slug,
                 'description' => $request->description,
-                'status'      => $request->status,
+                'status' => $request->status,
             ]);
 
             $plan->prices()->create([
                 'billing_cycle' => 'monthly',
-                'price'         => $request->monthly_price,
-                'currency'      => $request->currency,
-                'status'        => 'active',
+                'price' => $request->monthly_price,
+                'currency' => $request->currency,
+                'status' => 'active',
             ]);
 
             $plan->prices()->create([
                 'billing_cycle' => 'yearly',
-                'price'         => $request->yearly_price,
-                'currency'      => $request->currency,
-                'status'        => 'active',
+                'price' => $request->yearly_price,
+                'currency' => $request->currency,
+                'status' => 'active',
             ]);
 
             $this->syncFeatures($plan, $request);
@@ -50,27 +50,27 @@ class PlanService
     {
         return DB::transaction(function () use ($plan, $request) {
             $plan->update([
-                'name'        => $request->name,
-                'slug'        => $request->slug,
+                'name' => $request->name,
+                'slug' => $request->slug,
                 'description' => $request->description,
-                'status'      => $request->status,
+                'status' => $request->status,
             ]);
 
             $plan->prices()->updateOrCreate(
                 ['billing_cycle' => 'monthly'],
                 [
-                    'price'    => $request->monthly_price,
+                    'price' => $request->monthly_price,
                     'currency' => $request->currency,
-                    'status'   => 'active',
+                    'status' => 'active',
                 ]
             );
 
             $plan->prices()->updateOrCreate(
                 ['billing_cycle' => 'yearly'],
                 [
-                    'price'    => $request->yearly_price,
+                    'price' => $request->yearly_price,
                     'currency' => $request->currency,
-                    'status'   => 'active',
+                    'status' => 'active',
                 ]
             );
 

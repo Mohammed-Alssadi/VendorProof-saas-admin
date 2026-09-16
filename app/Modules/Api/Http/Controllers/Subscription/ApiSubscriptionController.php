@@ -54,7 +54,7 @@ class ApiSubscriptionController extends ApiController
         }
 
         $billingCycle = $request->billing_cycle ?? 'monthly';
-        $planPrice    = $newPlan->activePriceFor($billingCycle);
+        $planPrice = $newPlan->activePriceFor($billingCycle);
 
         if (! $planPrice) {
             return $this->errorResponse('خيار الفوترة المحدد غير متاح لهذه الباقة.', 422, [
@@ -68,8 +68,8 @@ class ApiSubscriptionController extends ApiController
             $tenant,
             $newPlan,
             $planPrice,
-            $request->success_url ?? $defaultFrontendUrl . '/billing?status=success',
-            $request->cancel_url  ?? $defaultFrontendUrl . '/pricing?status=canceled'
+            $request->success_url ?? $defaultFrontendUrl.'/billing?status=success',
+            $request->cancel_url ?? $defaultFrontendUrl.'/pricing?status=canceled'
         );
 
         return $this->successResponse(['checkout_url' => $checkoutUrl], 'تم إنشاء جلسة الدفع بنجاح.');

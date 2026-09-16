@@ -19,16 +19,16 @@ return new class extends Migration
 
             // 2. التصنيف (ربط اختياري مع تصنيفات الموردين)
             $table->foreignId('vendor_category_id')
-                  ->nullable()
-                  ->constrained('vendor_categories')
-                  ->nullOnDelete();
+                ->nullable()
+                ->constrained('vendor_categories')
+                ->nullOnDelete();
 
             // 3. البيانات الأساسية
             $table->string('name');                         // اسم منشأة / شركة المورد
             $table->string('contact_name');                 // اسم مسؤول التواصل
             $table->string('email');                        // البريد الإلكتروني للمورد
             $table->string('phone')->nullable();            // رقم الهاتف
-            
+
             // 4. حالة المورد
             $table->string('status')->default('pending');   // ['active', 'pending', 'suspended']
 

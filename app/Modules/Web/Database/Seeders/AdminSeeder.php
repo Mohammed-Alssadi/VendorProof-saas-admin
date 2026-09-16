@@ -12,15 +12,12 @@ use Illuminate\Support\Facades\Hash;
  * يتولى تهيئة الحساب الإداري الجذري للمنصة في بيئة التطوير والإنتاج الأولي،
  * لمنح المشرف صلاحية الوصول المباشرة للوحة التحكم.
  *
- * @package Database\Seeders
  * @author VendorProof Platform Architecture
  */
 class AdminSeeder extends Seeder
 {
     /**
      * تشغيل زارع البيانات لإنشاء الحساب الإداري الأولي.
-     *
-     * @return void
      */
     public function run(): void
     {

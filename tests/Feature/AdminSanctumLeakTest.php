@@ -19,10 +19,10 @@ class AdminSanctumLeakTest extends TestCase
     public function test_admin_session_is_strictly_rejected_by_api(): void
     {
         $admin = Admin::create([
-            'name'     => 'سوبر أدمن المنصة',
-            'email'    => 'superadmin@platform.com',
+            'name' => 'سوبر أدمن المنصة',
+            'email' => 'superadmin@platform.com',
             'password' => Hash::make('password123'),
-            'status'   => 'active',
+            'status' => 'active',
         ]);
 
         $response = $this->actingAs($admin, 'web')->getJson('/api/v1/profile');
@@ -36,25 +36,25 @@ class AdminSanctumLeakTest extends TestCase
     public function test_api_user_with_bearer_token_authenticates_successfully(): void
     {
         $tenant = Tenant::create([
-            'name'       => 'شركة تجريبية',
-            'slug'       => 'test-co',
+            'name' => 'شركة تجريبية',
+            'slug' => 'test-co',
             'company_cr' => '1010123456',
-            'email'      => 'info@testco.sa',
-            'phone'      => '0501234567',
-            'status'     => 'active',
+            'email' => 'info@testco.sa',
+            'phone' => '0501234567',
+            'status' => 'active',
         ]);
 
         $user = User::create([
             'tenant_id' => $tenant->id,
-            'name'      => 'مستخدم العميل الفعلي',
-            'email'     => 'client@testco.sa',
-            'password'  => Hash::make('password123'),
-            'status'    => 'active',
+            'name' => 'مستخدم العميل الفعلي',
+            'email' => 'client@testco.sa',
+            'password' => Hash::make('password123'),
+            'status' => 'active',
         ]);
 
         $token = $user->createToken('client-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/profile');
 
         $response->assertStatus(200);

@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Tenant;
 use App\Modules\Api\Models\User;
-use App\Modules\Api\Models\Vendors\VendorCategory;
+use App\Modules\Api\Models\VendorCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -14,6 +14,7 @@ class VendorCategoryApiTest extends TestCase
     use RefreshDatabase;
 
     private Tenant $tenant;
+
     private User $user;
 
     protected function setUp(): void
@@ -21,16 +22,16 @@ class VendorCategoryApiTest extends TestCase
         parent::setUp();
 
         $this->tenant = Tenant::create([
-            'name'  => 'شركة الاختبار الأولى',
-            'slug'  => 'test-company-1',
+            'name' => 'شركة الاختبار الأولى',
+            'slug' => 'test-company-1',
             'email' => 'company1@test.com',
         ]);
 
         $this->user = User::create([
             'tenant_id' => $this->tenant->id,
-            'name'      => 'مدير النظام 1',
-            'email'     => 'admin1@test.com',
-            'password'  => bcrypt('password'),
+            'name' => 'مدير النظام 1',
+            'email' => 'admin1@test.com',
+            'password' => bcrypt('password'),
         ]);
     }
 
@@ -46,9 +47,9 @@ class VendorCategoryApiTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $payload = [
-            'name'        => 'خدمات تقنية وبرمجية',
+            'name' => 'خدمات تقنية وبرمجية',
             'description' => 'موردو البرمجيات والبنية التحتية',
-            'is_active'   => true,
+            'is_active' => true,
         ];
 
         $response = $this->postJson('/api/v1/vendor-categories', $payload);
@@ -57,16 +58,16 @@ class VendorCategoryApiTest extends TestCase
             ->assertJson([
                 'success' => true,
                 'message' => 'تم إنشاء التصنيف بنجاح',
-                'data'    => [
-                    'name'        => 'خدمات تقنية وبرمجية',
+                'data' => [
+                    'name' => 'خدمات تقنية وبرمجية',
                     'description' => 'موردو البرمجيات والبنية التحتية',
-                    'is_active'   => true,
+                    'is_active' => true,
                 ],
             ]);
 
         $this->assertDatabaseHas('vendor_categories', [
             'tenant_id' => $this->tenant->id,
-            'name'      => 'خدمات تقنية وبرمجية',
+            'name' => 'خدمات تقنية وبرمجية',
         ]);
     }
 
@@ -76,7 +77,7 @@ class VendorCategoryApiTest extends TestCase
 
         VendorCategory::create([
             'tenant_id' => $this->tenant->id,
-            'name'      => 'مقاولات عامة',
+            'name' => 'مقاولات عامة',
         ]);
 
         $response = $this->postJson('/api/v1/vendor-categories', [
@@ -92,21 +93,21 @@ class VendorCategoryApiTest extends TestCase
         // تصنيف للمنشأة الأولى
         VendorCategory::create([
             'tenant_id' => $this->tenant->id,
-            'name'      => 'مقاولات عامة',
+            'name' => 'مقاولات عامة',
         ]);
 
         // منشأة ومستخدم ثانٍ
         $otherTenant = Tenant::create([
-            'name'  => 'شركة الاختبار الثانية',
-            'slug'  => 'test-company-2',
+            'name' => 'شركة الاختبار الثانية',
+            'slug' => 'test-company-2',
             'email' => 'company2@test.com',
         ]);
 
         $otherUser = User::create([
             'tenant_id' => $otherTenant->id,
-            'name'      => 'مدير النظام 2',
-            'email'     => 'admin2@test.com',
-            'password'  => bcrypt('password'),
+            'name' => 'مدير النظام 2',
+            'email' => 'admin2@test.com',
+            'password' => bcrypt('password'),
         ]);
 
         Sanctum::actingAs($otherUser);
@@ -122,18 +123,18 @@ class VendorCategoryApiTest extends TestCase
     {
         VendorCategory::create([
             'tenant_id' => $this->tenant->id,
-            'name'      => 'تصنيف خاص بالشركة الأولى',
+            'name' => 'تصنيف خاص بالشركة الأولى',
         ]);
 
         $otherTenant = Tenant::create([
-            'name'  => 'شركة الاختبار الثانية',
-            'slug'  => 'test-company-2',
+            'name' => 'شركة الاختبار الثانية',
+            'slug' => 'test-company-2',
             'email' => 'company2@test.com',
         ]);
 
         $otherCategory = VendorCategory::create([
             'tenant_id' => $otherTenant->id,
-            'name'      => 'تصنيف خاص بالشركة الثانية',
+            'name' => 'تصنيف خاص بالشركة الثانية',
         ]);
 
         Sanctum::actingAs($this->user);
@@ -153,19 +154,19 @@ class VendorCategoryApiTest extends TestCase
 
         $category = VendorCategory::create([
             'tenant_id' => $this->tenant->id,
-            'name'      => 'اسم قديم',
+            'name' => 'اسم قديم',
         ]);
 
         $response = $this->putJson("/api/v1/vendor-categories/{$category->id}", [
-            'name'        => 'اسم محدث',
+            'name' => 'اسم محدث',
             'description' => 'وصف محدث',
         ]);
 
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'data'    => [
-                    'name'        => 'اسم محدث',
+                'data' => [
+                    'name' => 'اسم محدث',
                     'description' => 'وصف محدث',
                 ],
             ]);
@@ -177,7 +178,7 @@ class VendorCategoryApiTest extends TestCase
 
         $category = VendorCategory::create([
             'tenant_id' => $this->tenant->id,
-            'name'      => 'تصنيف للحذف',
+            'name' => 'تصنيف للحذف',
         ]);
 
         $response = $this->deleteJson("/api/v1/vendor-categories/{$category->id}");
