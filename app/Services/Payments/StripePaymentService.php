@@ -45,7 +45,6 @@ class StripePaymentService
         $session = Session::create([
             'payment_method_types' => ['card'],
             'mode' => 'payment',
-            'locale' => 'ar',
             'customer_email' => $tenant->email,
             'client_reference_id' => (string) $payment->id,
             'line_items' => [
